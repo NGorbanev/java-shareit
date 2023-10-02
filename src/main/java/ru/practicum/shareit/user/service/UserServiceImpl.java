@@ -18,7 +18,7 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final UserStorage userStorage;
     private final UserValidator validator;
 
@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public User getUser(int id) {
         User user;
-        if(userStorage.getUserById(id).isPresent()) {
+        if (userStorage.getUserById(id).isPresent()) {
             user = UserMapper.toUser(userStorage.getUserById(id).get());
             return user;
         }

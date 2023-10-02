@@ -19,7 +19,7 @@ public class ItemsValidator {
     private final UserValidator userValidator;
 
     @Autowired
-    public ItemsValidator (ItemStorage itemStorage, UserStorage userStorage, UserValidator userValidator) {
+    public ItemsValidator(ItemStorage itemStorage, UserStorage userStorage, UserValidator userValidator) {
         this.itemStorage = itemStorage;
         this.userStorage = userStorage;
         this.userValidator = userValidator;

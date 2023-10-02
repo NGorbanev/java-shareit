@@ -16,9 +16,9 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public UserDto addUser(UserDto userDto) {
-            userDto.setId(++index);
-            storage.put(index, userDto);
-            return getUserById(index).isPresent() ? userDto : null;
+        userDto.setId(++index);
+        storage.put(index, userDto);
+        return getUserById(index).isPresent() ? userDto : null;
     }
 
     @Override

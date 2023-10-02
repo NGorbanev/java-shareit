@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Optional;
 
 @Component
-public class InMemoryItemStorage implements ItemStorage{
+public class InMemoryItemStorage implements ItemStorage {
 
     HashMap<Integer, ItemDto> storage = new HashMap<>();
     int index = 0;
@@ -45,8 +45,8 @@ public class InMemoryItemStorage implements ItemStorage{
     @Override
     public boolean removeItemById(int itemId) {
         if (storage.get(itemId) != null) {
-          storage.remove(itemId);
-          return true;
+            storage.remove(itemId);
+            return true;
         } else {
             throw new NotFoundException("item id=" + itemId);
         }

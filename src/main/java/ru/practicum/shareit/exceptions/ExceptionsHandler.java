@@ -27,7 +27,7 @@ public class ExceptionsHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(ValidatonException e){
+    public ErrorResponse handleValidationException(ValidatonException e) {
         log.warn("Validate exception: " + e.getMessage());
         return new ErrorResponse(String.format("Validation error: %s", e.getMessage()));
     }
@@ -56,7 +56,7 @@ public class ExceptionsHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleNotAlowedException (final  NotAllowedException e) {
+    public ErrorResponse handleNotAlowedException(final NotAllowedException e) {
         log.warn("Not allowed exception: ");
         return new ErrorResponse(e.getMessage());
     }

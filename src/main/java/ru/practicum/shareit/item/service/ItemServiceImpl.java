@@ -17,13 +17,13 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class ItemServiceImpl implements ItemService{
+public class ItemServiceImpl implements ItemService {
     private final ItemStorage itemStorage;
     private final UserStorage userStorage;
     private final ItemsValidator validator;
 
     @Autowired
-    public ItemServiceImpl (ItemStorage itemStorage, UserStorage userStorage, ItemsValidator validator) {
+    public ItemServiceImpl(ItemStorage itemStorage, UserStorage userStorage, ItemsValidator validator) {
         this.itemStorage = itemStorage;
         this.userStorage = userStorage;
         this.validator = validator;
@@ -109,7 +109,7 @@ public class ItemServiceImpl implements ItemService{
 
     @Override
     public boolean delete(int itemId, int userId) {
-        if (! validator.ownerMatch(itemId, userId)) {
+        if (!validator.ownerMatch(itemId, userId)) {
             throw new NotAllowedException(
                     String.format("User id=%s is not allowed to delete item id=%s", userId, itemId));
         }
@@ -128,7 +128,7 @@ public class ItemServiceImpl implements ItemService{
         return getAllItems().stream()
                 .filter(item -> item.getAvailable() &&
                         (item.getName().toUpperCase().contains(text.toUpperCase()) ||
-                        item.getDescription().toUpperCase().contains(text.toUpperCase())))
+                                item.getDescription().toUpperCase().contains(text.toUpperCase())))
                 .collect(Collectors.toList());
     }
 }

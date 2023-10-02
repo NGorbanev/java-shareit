@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 public class Item {
     @NotNull int id;
     @NotNull(message = "Item.name is null") String name;
-    @NotNull(message = "Item.description is null")String description;
+    @NotNull(message = "Item.description is null") String description;
     @NotNull(message = "Item.available is null") Boolean available;
     int requestId;
 }
