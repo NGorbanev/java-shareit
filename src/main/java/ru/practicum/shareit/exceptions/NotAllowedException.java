@@ -1,7 +1,6 @@
 package ru.practicum.shareit.exceptions;
 
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 
 public class NotAllowedException extends RuntimeException {
     public NotAllowedException(ItemDto item, int userId) {
