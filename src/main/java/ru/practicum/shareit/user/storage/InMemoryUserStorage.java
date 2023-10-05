@@ -22,7 +22,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Optional<UserDto> getUserById(int userId) {
+    public Optional getUserById(int userId) {
         return Optional.ofNullable(storage.get(userId));
 
     }

@@ -53,9 +53,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item create(ItemDto itemDto, Integer userId) {
-        //if (itemDto == null || userId == null) {
-        //    throw new NullPointerException("User id or item is null");
-        //}
         itemDto.setOwnerId(userId);
         validator.validateItemDto(itemDto);
         return ItemMapper.toItem(itemStorage.addItem(itemDto));
@@ -72,38 +69,38 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item update(int itemId, Item item, int user) {
+    public Item update(int itemId, Item itemTransferName, int user) {
         if (!validator.ownerMatch(itemId, user)) {
-            throw new NotAllowedException(item, user);
+            throw new NotAllowedException(itemTransferName, user);
         }
         Optional<ItemDto> itemDto = itemStorage.getItemById(itemId);
         if (itemDto.isPresent()) {
-            ItemDto itemForUpdate = ItemMapper.toItemDto(item);
-            itemForUpdate.setOwnerId(itemDto.get().getOwnerId());
-            itemForUpdate.setId(itemId);
-            if (item.getName() != null) {
-                itemForUpdate.setName(item.getName());
+            ItemDto itemDtoForUpdate = ItemMapper.toItemDto(itemTransferName);
+            itemDtoForUpdate.setOwnerId(itemDto.get().getOwnerId());
+            itemDtoForUpdate.setId(itemId);
+            if (itemTransferName.getName() != null) {
+                itemDtoForUpdate.setName(itemTransferName.getName());
             } else {
-                itemForUpdate.setName(itemDto.get().getName());
+                itemDtoForUpdate.setName(itemDto.get().getName());
             }
-            if (item.getDescription() != null) {
-                itemForUpdate.setDescription(item.getDescription());
+            if (itemTransferName.getDescription() != null) {
+                itemDtoForUpdate.setDescription(itemTransferName.getDescription());
             } else {
-                itemForUpdate.setDescription(itemDto.get().getDescription());
+                itemDtoForUpdate.setDescription(itemDto.get().getDescription());
             }
-            if (item.getAvailable() != null) {
-                itemForUpdate.setAvailable(item.getAvailable());
+            if (itemTransferName.getAvailable() != null) {
+                itemDtoForUpdate.setAvailable(itemTransferName.getAvailable());
             } else {
-                itemForUpdate.setAvailable(itemDto.get().getAvailable());
+                itemDtoForUpdate.setAvailable(itemDto.get().getAvailable());
             }
-            if (Integer.valueOf(item.getRequestId()) != null) {
-                itemForUpdate.setRequestId(item.getRequestId());
+            if (Integer.valueOf(itemTransferName.getRequestId()) != null) {
+                itemDtoForUpdate.setRequestId(itemTransferName.getRequestId());
             } else {
-                itemForUpdate.setRequestId(itemDto.get().getRequestId());
+                itemDtoForUpdate.setRequestId(itemDto.get().getRequestId());
             }
-            return ItemMapper.toItem(itemStorage.updateItem(itemForUpdate));
+            return ItemMapper.toItem(itemStorage.updateItem(itemDtoForUpdate));
         } else {
-            throw new NotFoundException(item);
+            throw new NotFoundException(itemTransferName);
         }
     }
 

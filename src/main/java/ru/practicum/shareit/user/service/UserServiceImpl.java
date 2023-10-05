@@ -12,6 +12,8 @@ import ru.practicum.shareit.user.utils.UserMapper;
 import ru.practicum.shareit.user.utils.UserValidator;
 import ru.practicum.shareit.user.utils.UserValidatorSettings;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,7 +31,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Collection<User> getAllUsers() {
+    public Collection getAllUsers() {
         List<User> users = new ArrayList<>();
         for (UserDto u : userStorage.getAllUsers()) {
             users.add(UserMapper.toUser(u));
@@ -49,7 +51,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User addUser(UserDto userDto) {
-        if (validator.validateUserDto(userDto, UserValidatorSettings.FULL_CHECK)) {
+        if (validator.validateUserDto(userDto, UserValidatorSettings.EMAIL_CHECK)) {
             return UserMapper.toUser(userStorage.addUser(userDto));
         }
         throw new ValidatonException(userDto, "Validation failed");

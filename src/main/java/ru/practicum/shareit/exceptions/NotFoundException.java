@@ -2,7 +2,7 @@ package ru.practicum.shareit.exceptions;
 
 public class NotFoundException extends RuntimeException {
     public NotFoundException(Object obj) {
-        super(String.format("Object %s not found %s", obj.getClass().getName()));
+        super(String.format("Object %s not found", obj.getClass().getName()));
     }
 
     public NotFoundException(String msg) {

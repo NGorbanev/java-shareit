@@ -6,7 +6,7 @@ import ru.practicum.shareit.user.model.User;
 import java.util.Collection;
 
 public interface UserService {
-    Collection<User> getAllUsers();
+    Collection getAllUsers();
 
     User getUser(int id);
 

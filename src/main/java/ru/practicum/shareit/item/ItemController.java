@@ -10,9 +10,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
 
-/**
- * TODO Sprint add-controllers.
- */
+
 @RestController
 @RequestMapping("/items")
 @Slf4j
@@ -26,31 +24,37 @@ public class ItemController {
 
     @PostMapping()
     public Item postItem(@RequestBody @Valid ItemDto itemDto, @RequestHeader(USER_ID) int userId) {
+        log.debug(String.format("POST request received. UserId=%s Object=%s", userId, itemDto));
         return itemService.create(itemDto, userId);
     }
 
     @PatchMapping("/{itemId}")
     public Item patchItem(@PathVariable int itemId, @RequestBody Item item, @RequestHeader(USER_ID) int userId) {
+        log.debug(String.format("PATCH request received. UserId=%s Object=%s", userId, item));
         return itemService.update(itemId, item, userId);
     }
 
     @DeleteMapping("/{itemId}")
     public boolean deleteItem(@PathVariable int itemId, @RequestHeader(USER_ID) int userId) {
+        log.debug(String.format("DELETE request received. UserId=%s , itemId=%s", userId, itemId));
         return itemService.delete(itemId, userId);
     }
 
     @GetMapping()
     public Collection<Item> getAllItemsOfUser(@RequestHeader(USER_ID) int userId) {
+        log.debug(String.format("GET request received. getAllItemsOfUser method used"));
         return itemService.getAllItemsOfUser(userId);
     }
 
     @GetMapping("/{itemId}")
     public Item getItemById(@PathVariable int itemId) {
+        log.debug(String.format("GET itemId=%s", itemId));
         return itemService.get(itemId);
     }
 
     @GetMapping("/search")
-    public Collection<Item> serchForItem(@NotNull @RequestParam(name = "text") String searchQuery) {
+    public Collection<Item> searchForItem(@NotNull @RequestParam(name = "text") String searchQuery) {
+        log.debug(String.format("GET request received. Searching for '%s'", searchQuery));
         return itemService.search(searchQuery);
     }
 }

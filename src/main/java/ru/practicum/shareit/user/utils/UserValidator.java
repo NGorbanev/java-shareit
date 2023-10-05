@@ -21,6 +21,7 @@ public class UserValidator {
     }
 
     public boolean validateUserDto(UserDto userDto, UserValidatorSettings type) {
+        type = UserValidatorSettings.EMAIL_CHECK;
         switch (type) {
             case FULL_CHECK:
                 if (userDto.getName().isBlank() || userDto.getName().isEmpty()) {
@@ -30,7 +31,6 @@ public class UserValidator {
                     throw new ValidatonException(userDto, "Email field is empty or blank");
                 }
                 validateUserDto(userDto, UserValidatorSettings.EMAIL_CHECK);
-
                 break;
             case EMAIL_CHECK:
                 for (UserDto u : userStorage.getAllUsers()) {

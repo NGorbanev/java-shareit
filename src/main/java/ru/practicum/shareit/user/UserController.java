@@ -26,26 +26,31 @@ public class UserController {
 
     @PostMapping
     public User postUser(@Valid @RequestBody UserDto userDto) {
+        log.debug(String.format("POST request received. user=%s", userDto));
         return service.addUser(userDto);
     }
 
     @PatchMapping("/{userId}")
     public User updateUser(@PathVariable int userId, @RequestBody UserDto userDto) {
+        log.debug(String.format("PATCH request received. UserId=%s updating user=%s", userId, userDto));
         return service.update(userId, userDto);
     }
 
     @DeleteMapping("/{userId}")
     public Boolean deleteUser(@PathVariable int userId) {
+        log.debug(String.format("DELETE request received. UserId=%s", userId));
         return service.deleteUser(userId);
     }
 
     @GetMapping()
     public Collection<User> getAllUsers() {
+        log.debug("GET all users request received");
         return service.getAllUsers();
     }
 
     @GetMapping("/{userId}")
     public User getUserById(@PathVariable int userId) {
+        log.debug(String.format("GET request received. UserId=%s ", userId));
         return service.getUser(userId);
     }
 }
