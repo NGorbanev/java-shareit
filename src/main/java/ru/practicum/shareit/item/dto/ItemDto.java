@@ -20,6 +20,5 @@ public class ItemDto {
     @NotEmpty (message = "Item description must no be empty")
     String description;
     @NotNull(message = "Item.available is null") Boolean available;
-    int ownerId;
     int requestId;
 }

@@ -10,10 +10,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 import ru.practicum.shareit.user.utils.UserMapper;
 import ru.practicum.shareit.user.utils.UserValidator;
-import ru.practicum.shareit.user.utils.UserValidatorSettings;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,45 +28,46 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Collection getAllUsers() {
-        List<User> users = new ArrayList<>();
-        for (UserDto u : userStorage.getAllUsers()) {
-            users.add(UserMapper.toUser(u));
+    public Collection<UserDto> getAllUsers() {
+        List<UserDto> users = new ArrayList<>();
+        for (User u : userStorage.getAllUsers()) {
+            users.add(UserMapper.toUserDto(u));
         }
         return users;
     }
 
     @Override
-    public User getUser(int id) {
-        User user;
+    public UserDto getUser(int id) {
+        UserDto userDto;
         if (userStorage.getUserById(id).isPresent()) {
-            user = UserMapper.toUser(userStorage.getUserById(id).get());
-            return user;
+            userDto = UserMapper.toUserDto(userStorage.getUserById(id).get());
+            return userDto;
         }
         throw new NotFoundException("User id=" + id + " not found");
     }
 
     @Override
-    public User addUser(UserDto userDto) {
-        if (validator.validateUserDto(userDto, UserValidatorSettings.EMAIL_CHECK)) {
-            return UserMapper.toUser(userStorage.addUser(userDto));
+    public UserDto addUser(UserDto userDto) {
+        if (validator.validateUserDto(userDto)) {
+            return UserMapper.toUserDto(userStorage.addUser(UserMapper.toUser(userDto)));
         }
         throw new ValidatonException(userDto, "Validation failed");
     }
 
     @Override
-    public User update(int id, UserDto userDto) {
+    public UserDto update(int id, UserDto userDto) {
         if (userStorage.getUserById(id).isPresent()) {
-            UserDto oldUser = userStorage.getUserById(id).get();
+            User oldUser = userStorage.getUserById(id).get();
             if (userDto.getName() == null) {
                 userDto.setName(oldUser.getName());
             }
             if (userDto.getEmail() == null) {
                 userDto.setEmail(oldUser.getEmail());
             } else if (!userDto.getEmail().equals(oldUser.getEmail())) {
-                validator.validateUserDto(userDto, UserValidatorSettings.EMAIL_CHECK);
+                validator.validateUserDto(userDto);
             }
-            return UserMapper.toUser(userStorage.updateUser(id, userDto));
+            User updatedUser = UserMapper.toUser(userDto);
+            return UserMapper.toUserDto(userStorage.updateUser(id, updatedUser));
         } else {
             throw new NotFoundException(userDto);
         }

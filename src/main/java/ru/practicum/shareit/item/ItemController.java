@@ -23,15 +23,15 @@ public class ItemController {
     }
 
     @PostMapping()
-    public Item postItem(@RequestBody @Valid ItemDto itemDto, @RequestHeader(USER_ID) int userId) {
+    public ItemDto postItem(@RequestBody @Valid ItemDto itemDto, @RequestHeader(USER_ID) int userId) {
         log.debug(String.format("POST request received. UserId=%s Object=%s", userId, itemDto));
         return itemService.create(itemDto, userId);
     }
 
     @PatchMapping("/{itemId}")
-    public Item patchItem(@PathVariable int itemId, @RequestBody Item item, @RequestHeader(USER_ID) int userId) {
-        log.debug(String.format("PATCH request received. UserId=%s Object=%s", userId, item));
-        return itemService.update(itemId, item, userId);
+    public ItemDto patchItem(@PathVariable int itemId, @RequestBody ItemDto itemDto, @RequestHeader(USER_ID) int userId) {
+        log.debug(String.format("PATCH request received. UserId=%s Object=%s", userId, itemDto));
+        return itemService.update(itemId, itemDto, userId);
     }
 
     @DeleteMapping("/{itemId}")
@@ -41,19 +41,19 @@ public class ItemController {
     }
 
     @GetMapping()
-    public Collection<Item> getAllItemsOfUser(@RequestHeader(USER_ID) int userId) {
+    public Collection<ItemDto> getAllItemsOfUser(@RequestHeader(USER_ID) int userId) {
         log.debug(String.format("GET request received. getAllItemsOfUser method used"));
         return itemService.getAllItemsOfUser(userId);
     }
 
     @GetMapping("/{itemId}")
-    public Item getItemById(@PathVariable int itemId) {
+    public ItemDto getItemById(@PathVariable int itemId) {
         log.debug(String.format("GET itemId=%s", itemId));
         return itemService.get(itemId);
     }
 
     @GetMapping("/search")
-    public Collection<Item> searchForItem(@NotNull @RequestParam(name = "text") String searchQuery) {
+    public Collection<ItemDto> searchForItem(@NotNull @RequestParam(name = "text") String searchQuery) {
         log.debug(String.format("GET request received. Searching for '%s'", searchQuery));
         return itemService.search(searchQuery);
     }

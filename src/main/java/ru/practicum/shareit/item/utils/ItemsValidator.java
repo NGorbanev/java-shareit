@@ -4,9 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidatonException;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemStorage;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 import ru.practicum.shareit.user.utils.UserValidator;
 
@@ -25,13 +25,13 @@ public class ItemsValidator {
         this.userValidator = userValidator;
     }
 
-    public boolean validateItemDto(ItemDto itemDto) {
-        userValidator.validateUserById(itemDto.getOwnerId());
-        if (itemDto.getName().isEmpty() || itemDto.getName().isBlank()) {
-            throw new ValidatonException(itemDto, "Name field is empty");
+    public boolean validateItem(Item item) {
+        userValidator.validateUserById(item.getOwnerId());
+        if (item.getName().isEmpty() || item.getName().isBlank()) {
+            throw new ValidatonException(item, "Name field is empty");
         }
-        if (itemDto.getDescription().isEmpty() || itemDto.getDescription().isBlank()) {
-            throw new ValidatonException(itemDto, "Description field is empty");
+        if (item.getDescription().isEmpty() || item.getDescription().isBlank()) {
+            throw new ValidatonException(item, "Description field is empty");
         }
         return true;
     }
@@ -41,11 +41,11 @@ public class ItemsValidator {
             throw new NullPointerException("User or Item is null");
         }
         userValidator.validateUserById(userId);
-        Optional<ItemDto> inputItem = itemStorage.getItemById(itemId);
+        Optional<Item> inputItem = itemStorage.getItemById(itemId);
         if (inputItem.isPresent()) {
-            Optional<UserDto> inputUser = userStorage.getUserById(userId);
+            Optional<User> inputUser = userStorage.getUserById(userId);
             if (inputUser.isPresent()) {
-                Optional<UserDto> itemOwner = userStorage.getUserById(inputItem.get().getOwnerId());
+                Optional<User> itemOwner = userStorage.getUserById(inputItem.get().getOwnerId());
                 if (itemOwner.isPresent()) {
                     if (userId.equals(itemOwner.get().getId())) {
                         return true;

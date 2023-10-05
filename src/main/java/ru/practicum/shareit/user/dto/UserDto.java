@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.validator.constraints.UniqueElements;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;

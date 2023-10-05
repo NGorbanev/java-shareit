@@ -2,7 +2,7 @@ package ru.practicum.shareit.item.storage;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exceptions.NotFoundException;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Item;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,35 +11,35 @@ import java.util.Optional;
 @Component
 public class InMemoryItemStorage implements ItemStorage {
 
-    HashMap<Integer, ItemDto> storage = new HashMap<>();
+    HashMap<Integer, Item> storage = new HashMap<>();
     int index = 0;
 
     @Override
-    public Collection<ItemDto> getAll() {
+    public Collection<Item> getAll() {
         return storage.values();
     }
 
     @Override
-    public Optional<ItemDto> getItemById(int itemId) {
+    public Optional<Item> getItemById(int itemId) {
         return Optional.ofNullable(storage.get(itemId));
     }
 
     @Override
-    public ItemDto addItem(ItemDto itemDto) {
-        itemDto.setId(++index);
-        storage.put(index, itemDto);
-        return getItemById(index).isEmpty() ? null : itemDto;
+    public Item addItem(Item item) {
+        item.setId(++index);
+        storage.put(index, item);
+        return getItemById(index).isEmpty() ? null : item;
     }
 
     @Override
-    public ItemDto updateItem(ItemDto itemDto) {
-        storage.put(itemDto.getId(), itemDto);
-        return getItemById(index).isPresent() ? itemDto : null;
+    public Item updateItem(Item item) {
+        storage.put(item.getId(), item);
+        return getItemById(index).isPresent() ? item : null;
     }
 
     @Override
-    public boolean removeItem(ItemDto itemDto) {
-        return storage.remove(itemDto.getId()).equals(itemDto);
+    public boolean removeItem(Item item) {
+        return storage.remove(item.getId()).equals(item);
     }
 
     @Override
