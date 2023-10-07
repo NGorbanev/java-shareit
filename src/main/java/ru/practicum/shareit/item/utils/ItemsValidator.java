@@ -9,8 +9,6 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 import ru.practicum.shareit.user.utils.UserValidator;
 
-import java.util.Optional;
-
 @Component
 public class ItemsValidator {
     private final ItemStorage itemStorage;
