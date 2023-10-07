@@ -31,9 +31,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> getAllItems() {
-        ArrayList<Item> itemDtos = new ArrayList<>(itemStorage.getAll());
         Collection<ItemDto> result = new ArrayList<>();
-        for (Item i : itemDtos) {
+        for (Item i : itemStorage.getAll()) {
             result.add(ItemMapper.toItemDto(i));
         }
         return result;

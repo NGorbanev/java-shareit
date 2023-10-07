@@ -28,11 +28,11 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public boolean deleteUserById(int userId) {
-        if (storage.containsKey(userId)) {
-            storage.remove(userId);
+        if (storage.remove(userId) == null) {
+            throw new NotFoundException(String.format("User id=%s was not found", userId));
+        } else {
             return true;
         }
-        throw new NotFoundException(String.format("User id=%s was not found", userId));
     }
 
     @Override
@@ -42,8 +42,10 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(int userId, User user) {
-        if (storage.containsKey(userId)) {
-            User oldUser = storage.get(userId);
+        User oldUser = storage.get(userId);
+        if (oldUser == null) {
+            throw new NotFoundException(String.format(user.toString(), userId));
+        } else {
             user.setId(userId);
             if (user.getName() == null) {
                 user.setName(oldUser.getName());
@@ -53,7 +55,6 @@ public class InMemoryUserStorage implements UserStorage {
             }
             storage.put(userId, user);
             return storage.get(userId);
+            }
         }
-        throw new NotFoundException(String.format("User id=%s was not found", userId));
     }
-}

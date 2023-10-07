@@ -5,9 +5,9 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import java.util.Collection;
 
 public interface ItemService {
-    Collection getAllItems();
+    Collection<ItemDto> getAllItems();
 
-    Collection getAllItemsOfUser(int userId);
+    Collection<ItemDto> getAllItemsOfUser(int userId);
 
     ItemDto create(ItemDto itemDto, Integer userId);
 
@@ -17,5 +17,5 @@ public interface ItemService {
 
     boolean delete(int itemId, int userId);
 
-    Collection search(String text);
+    Collection<ItemDto> search(String text);
 }

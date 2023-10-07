@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class Item {
-    @NotNull int id;
+    int id;
     @NotNull @NotEmpty @NotBlank (message = "ItemDto.name is null or empty")
     String name;
     String description;
