@@ -23,7 +23,6 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemStorage;
     private final UserServiceImpl userService;
     private final ItemsValidator validator;
-    //private final UserMapper userMapper;
 
     @Autowired
     public ItemServiceImpl(ItemRepository itemStorage, UserServiceImpl userService, ItemsValidator validator/*, UserMapper userMapper*/) {

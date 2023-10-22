@@ -1,7 +1,9 @@
 package ru.practicum.shareit.user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exceptions.ConflictException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidatonException;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -43,10 +45,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto addUser(UserDto userDto) {
-        if (validator.validateUserDto(userDto)) {
+        try {
             return UserMapper.toUserDto(userRepository.save(UserMapper.toUser(userDto)));
+        } catch (DataIntegrityViolationException e) {
+            throw new ConflictException("Email is already registered");
         }
-        throw new ValidatonException(userDto, "Validation failed");
     }
 
     @Override
