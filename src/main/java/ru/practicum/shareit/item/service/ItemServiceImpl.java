@@ -29,7 +29,6 @@ public class ItemServiceImpl implements ItemService {
         this.itemStorage = itemStorage;
         this.userService = userService;
         this.validator = validator;
-        //this.userMapper = userMapper;
     }
 
     @Override

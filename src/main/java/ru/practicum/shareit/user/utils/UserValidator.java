@@ -10,11 +10,9 @@ import ru.practicum.shareit.user.storage.UserRepository;
 
 @Component
 public class UserValidator {
-    //private final UserStorage userStorage;
     private final UserRepository userStorage;
 
     @Autowired
-    //public UserValidator(UserStorage userStorage) {
     public UserValidator(UserRepository userStorage) {
         this.userStorage = userStorage;
     }

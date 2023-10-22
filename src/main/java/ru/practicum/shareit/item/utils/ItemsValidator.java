@@ -11,7 +11,6 @@ import ru.practicum.shareit.user.utils.UserValidator;
 
 @Component
 public class ItemsValidator {
-    //private final ItemStorage itemStorage;
     private final ItemRepository itemStorage;
     private final UserRepository userStorage;
     private final UserValidator userValidator;
