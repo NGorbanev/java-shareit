@@ -2,10 +2,11 @@ package ru.practicum.shareit.user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidatonException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.storage.UserRepository;
 import ru.practicum.shareit.user.utils.UserMapper;
 import ru.practicum.shareit.user.utils.UserValidator;
 
@@ -15,19 +16,19 @@ import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
-    private final UserStorage userStorage;
+    private final UserRepository userRepository;
     private final UserValidator validator;
 
     @Autowired
-    public UserServiceImpl(UserStorage userStorage, UserValidator validator) {
-        this.userStorage = userStorage;
+    public UserServiceImpl(UserValidator validator, UserRepository userRepository) {
+        this.userRepository = userRepository;
         this.validator = validator;
     }
 
     @Override
     public Collection<UserDto> getAllUsers() {
         List<UserDto> users = new ArrayList<>();
-        for (User u : userStorage.getAllUsers()) {
+        for (User u : userRepository.findAll()) {
             users.add(UserMapper.toUserDto(u));
         }
         return users;
@@ -35,7 +36,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUser(int id) {
-        UserDto userDto = UserMapper.toUserDto(userStorage.getUserById(id).orElseThrow());
+        UserDto userDto = UserMapper.toUserDto(userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found")));
         return userDto;
 
     }
@@ -43,14 +44,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto addUser(UserDto userDto) {
         if (validator.validateUserDto(userDto)) {
-            return UserMapper.toUserDto(userStorage.addUser(UserMapper.toUser(userDto)));
+            return UserMapper.toUserDto(userRepository.save(UserMapper.toUser(userDto)));
         }
         throw new ValidatonException(userDto, "Validation failed");
     }
 
     @Override
     public UserDto update(int id, UserDto userDto) {
-        User oldUser = userStorage.getUserById(id).orElseThrow();
+        User oldUser = userRepository.findById(id).orElseThrow();
         if (userDto.getName() == null) {
             userDto.setName(oldUser.getName());
         }
@@ -60,11 +61,12 @@ public class UserServiceImpl implements UserService {
             validator.validateUserDto(userDto);
         }
         User updatedUser = UserMapper.toUser(userDto);
-        return UserMapper.toUserDto(userStorage.updateUser(id, updatedUser));
+        updatedUser.setId(id);
+        return UserMapper.toUserDto(userRepository.save(updatedUser));
     }
 
     @Override
-    public boolean deleteUser(int id) {
-        return userStorage.deleteUserById(id);
+    public void deleteUser(int id) {
+        userRepository.deleteById(id);
     }
 }

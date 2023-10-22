@@ -36,7 +36,8 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public Boolean deleteUser(@PathVariable int userId) {
         log.debug(String.format("DELETE request received. UserId=%s", userId));
-        return service.deleteUser(userId);
+        service.deleteUser(userId);
+        return true;
     }
 
     @GetMapping()

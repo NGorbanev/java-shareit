@@ -7,10 +7,11 @@ import ru.practicum.shareit.exceptions.NotAllowedException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.item.utils.ItemMapper;
 import ru.practicum.shareit.item.utils.ItemsValidator;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.service.UserServiceImpl;
+import ru.practicum.shareit.user.utils.UserMapper;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,21 +19,24 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class ItemServiceImpl implements ItemService {
-    private final ItemStorage itemStorage;
-    private final UserStorage userStorage;
+
+    private final ItemRepository itemStorage;
+    private final UserServiceImpl userService;
     private final ItemsValidator validator;
+    //private final UserMapper userMapper;
 
     @Autowired
-    public ItemServiceImpl(ItemStorage itemStorage, UserStorage userStorage, ItemsValidator validator) {
+    public ItemServiceImpl(ItemRepository itemStorage, UserServiceImpl userService, ItemsValidator validator/*, UserMapper userMapper*/) {
         this.itemStorage = itemStorage;
-        this.userStorage = userStorage;
+        this.userService = userService;
         this.validator = validator;
+        //this.userMapper = userMapper;
     }
 
     @Override
     public Collection<ItemDto> getAllItems() {
         Collection<ItemDto> result = new ArrayList<>();
-        for (Item i : itemStorage.getAll()) {
+        for (Item i : itemStorage.findAll()) {
             result.add(ItemMapper.toItemDto(i));
         }
         return result;
@@ -40,8 +44,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> getAllItemsOfUser(int userId) {
-        List<Item> items = itemStorage.getAll().stream()
-                .filter(itemDto -> itemDto.getOwnerId() == userId)
+        List<Item> items = itemStorage.findAll().stream()
+                .filter(itemDto -> itemDto.getOwner().getId() == userId)
                 .collect(Collectors.toList());
         ArrayList<ItemDto> result = new ArrayList<>();
         for (Item i : items) {
@@ -53,14 +57,14 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto create(ItemDto itemDto, Integer userId) {
         Item item = ItemMapper.toItem(itemDto);
-        item.setOwnerId(userId);
+        item.setOwner(UserMapper.toUser(userService.getUser(userId)));
         validator.validateItem(item);
-        return ItemMapper.toItemDto(itemStorage.addItem(item));
+        return ItemMapper.toItemDto(itemStorage.save(item));
     }
 
     @Override
     public ItemDto get(int itemId) {
-        Optional<Item> item = itemStorage.getItemById(itemId);
+        Optional<Item> item = itemStorage.findById(itemId);
         if (item.isPresent()) {
             return ItemMapper.toItemDto(item.get());
         } else {
@@ -73,11 +77,11 @@ public class ItemServiceImpl implements ItemService {
         if (!validator.ownerMatch(itemId, user)) {
             throw new NotAllowedException(itemTransferName, user);
         }
-        Optional<Item> item = itemStorage.getItemById(itemId);
+        Optional<Item> item = itemStorage.findById(itemId);
         if (item.isPresent()) {
             Item itemForUpdate = ItemMapper.toItem(itemTransferName);
-            itemForUpdate.setOwnerId(item.get().getOwnerId());
             itemForUpdate.setId(itemId);
+            itemForUpdate.setOwner(item.get().getOwner());
             if (itemTransferName.getName() != null) {
                 itemForUpdate.setName(itemTransferName.getName());
             } else {
@@ -98,7 +102,7 @@ public class ItemServiceImpl implements ItemService {
             } else {
                 itemForUpdate.setRequestId(item.get().getRequestId());
             }
-            return ItemMapper.toItemDto(itemStorage.updateItem(itemForUpdate));
+            return ItemMapper.toItemDto(itemStorage.save(itemForUpdate));
         } else {
             throw new NotFoundException(itemTransferName);
         }
@@ -110,11 +114,8 @@ public class ItemServiceImpl implements ItemService {
             throw new NotAllowedException(
                     String.format("User id=%s is not allowed to delete item id=%s", userId, itemId));
         }
-        if (itemStorage.removeItemById(itemId)) {
-            return true;
-        } else {
-            return false;
-        }
+        itemStorage.deleteById(itemId);
+        return true;
     }
 
     @Override
