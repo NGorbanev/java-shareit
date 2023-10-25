@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class IncomingBookingDto {
     int itemId;
-    @FutureOrPresent LocalDateTime start;
-    @Future LocalDateTime end;
+    @FutureOrPresent
+    LocalDateTime start;
+    @Future
+    LocalDateTime end;
 }

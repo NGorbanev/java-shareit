@@ -44,4 +44,17 @@ public class ItemsValidator {
             return false;
         }
     }
+
+    public boolean isAvailable(Integer itemId) {
+        if (itemId == null || itemId == 0) {
+            throw new NullPointerException("Item id error");
+        }
+        Item item = itemStorage.findById(itemId).orElseThrow(
+                () -> new NotFoundException("Item id=" + itemId + " was not found"));
+        if (item.getAvailable()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

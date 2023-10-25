@@ -46,9 +46,9 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@PathVariable int itemId) {
+    public ItemDto getItemById(@PathVariable int itemId, @RequestHeader(USER_ID) int userId) {
         log.debug(String.format("GET itemId=%s", itemId));
-        return itemService.get(itemId);
+        return itemService.get(itemId, userId);
     }
 
     @GetMapping("/search")

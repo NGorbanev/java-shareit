@@ -17,11 +17,13 @@ import ru.practicum.shareit.user.utils.UserMapper;
 public class BookingMapper {
     private final UserService userService;
     private final ItemService itemService;
+    private final ItemMapper itemMapper;
 
     @Autowired
-    public BookingMapper(UserService userService, ItemService itemService) {
+    public BookingMapper(UserService userService, ItemService itemService, ItemMapper im) {
         this.userService = userService;
         this.itemService = itemService;
+        this.itemMapper = im;
     }
 
     public BookingDto toBookingDto(Booking booking) {
@@ -30,8 +32,8 @@ public class BookingMapper {
                     .id(booking.getId())
                     .start(booking.getStart())
                     .end(booking.getEnd())
-                    .itemDto(ItemMapper.toItemDto(booking.getItem()))
-                    .bookerDto(UserMapper.toUserDto(booking.getBooker()))
+                    .item(itemMapper.toItemDto(booking.getItem()))
+                    .booker(UserMapper.toUserDto(booking.getBooker()))
                     .status(booking.getStatus())
                     .build();
         }
@@ -44,12 +46,12 @@ public class BookingMapper {
         if (booking != null) {
             return ShortBookingInfo.builder()
                     .id(booking.getId())
-                    .bookerId(booking.getId())
+                    .bookerId(booking.getBooker().getId())
                     .start(booking.getStart())
                     .end(booking.getEnd())
                     .build();
         } else {
-            throw new ValidatonException("Unable to convert Booking to ShortBookingInfo");
+            return null;
         }
     }
 
@@ -57,7 +59,7 @@ public class BookingMapper {
         return Booking.builder()
                 .start(input.getStart())
                 .end(input.getEnd())
-                .item(ItemMapper.toItem(itemService.get(input.getItemId())))
+                .item(itemMapper.toItem(itemService.get(input.getItemId(), bookerId)))
                 .booker(UserMapper.toUser(userService.getUser(bookerId)))
                 .status(BookingStatus.WAITING)
                 .build();

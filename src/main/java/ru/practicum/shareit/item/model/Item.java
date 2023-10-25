@@ -25,9 +25,8 @@ public class Item {
     String description;
     @NotNull (message = "ItemDto.available is null")
     Boolean available;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "owner_id")
-    //int ownerId;
     User owner;
     int requestId;
 }

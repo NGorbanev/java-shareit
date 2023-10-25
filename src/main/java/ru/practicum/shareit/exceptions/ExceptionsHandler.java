@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.validation.ConstraintViolationException;
+
 @RestControllerAdvice
 @Slf4j
 public class ExceptionsHandler {
@@ -30,6 +32,13 @@ public class ExceptionsHandler {
     public ErrorResponse handleValidationException(ValidatonException e) {
         log.warn("Validate exception: {}", e.getMessage());
         return new ErrorResponse(String.format("Validation error: %s", e.getMessage()));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleUnknownStateException(UnknownStateException e) {
+        log.warn("Unknown state exception: {}", e.getMessage());
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
@@ -59,5 +68,12 @@ public class ExceptionsHandler {
     public ErrorResponse handleNotAlowedException(final NotAllowedException e) {
         log.warn("Not allowed exception: {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleConstraintException(final ConstraintViolationException e) {
+        log.warn("Constraint exception: " + e.getMessage());
+        return new ErrorResponse("Constraint exception " + e.getMessage());
     }
 }

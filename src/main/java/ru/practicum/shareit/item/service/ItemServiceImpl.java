@@ -23,19 +23,24 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemStorage;
     private final UserServiceImpl userService;
     private final ItemsValidator validator;
+    private final ItemMapper itemMapper;
 
     @Autowired
-    public ItemServiceImpl(ItemRepository itemStorage, UserServiceImpl userService, ItemsValidator validator/*, UserMapper userMapper*/) {
+    public ItemServiceImpl(ItemRepository itemStorage,
+                           UserServiceImpl userService,
+                           ItemsValidator validator,
+                           ItemMapper im) {
         this.itemStorage = itemStorage;
         this.userService = userService;
         this.validator = validator;
+        this.itemMapper = im;
     }
 
     @Override
     public Collection<ItemDto> getAllItems() {
         Collection<ItemDto> result = new ArrayList<>();
         for (Item i : itemStorage.findAll()) {
-            result.add(ItemMapper.toItemDto(i));
+            result.add(itemMapper.toItemDto(i));
         }
         return result;
     }
@@ -47,24 +52,28 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
         ArrayList<ItemDto> result = new ArrayList<>();
         for (Item i : items) {
-            result.add(ItemMapper.toItemDto(i));
+            result.add(itemMapper.itemDtoExtended(i));
         }
         return result;
     }
 
     @Override
     public ItemDto create(ItemDto itemDto, Integer userId) {
-        Item item = ItemMapper.toItem(itemDto);
+        Item item = itemMapper.toItem(itemDto);
         item.setOwner(UserMapper.toUser(userService.getUser(userId)));
         validator.validateItem(item);
-        return ItemMapper.toItemDto(itemStorage.save(item));
+        return itemMapper.toItemDto(itemStorage.save(item));
     }
 
     @Override
-    public ItemDto get(int itemId) {
+    public ItemDto get(int itemId, int userId) {
         Optional<Item> item = itemStorage.findById(itemId);
         if (item.isPresent()) {
-            return ItemMapper.toItemDto(item.get());
+            if (validator.ownerMatch(itemId, userId)) {
+                return itemMapper.itemDtoExtended(item.get());
+            } else {
+                return itemMapper.toItemDto(item.get());
+            }
         } else {
             throw new NotFoundException(String.format("Item id=%s not found", itemId));
         }
@@ -77,7 +86,7 @@ public class ItemServiceImpl implements ItemService {
         }
         Optional<Item> item = itemStorage.findById(itemId);
         if (item.isPresent()) {
-            Item itemForUpdate = ItemMapper.toItem(itemTransferName);
+            Item itemForUpdate = itemMapper.toItem(itemTransferName);
             itemForUpdate.setId(itemId);
             itemForUpdate.setOwner(item.get().getOwner());
             if (itemTransferName.getName() != null) {
@@ -100,7 +109,7 @@ public class ItemServiceImpl implements ItemService {
             } else {
                 itemForUpdate.setRequestId(item.get().getRequestId());
             }
-            return ItemMapper.toItemDto(itemStorage.save(itemForUpdate));
+            return itemMapper.toItemDto(itemStorage.save(itemForUpdate));
         } else {
             throw new NotFoundException(itemTransferName);
         }
