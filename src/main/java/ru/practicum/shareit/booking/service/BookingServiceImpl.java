@@ -11,40 +11,29 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.booking.utils.BookingMapper;
-import ru.practicum.shareit.exceptions.ConflictException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.UnknownStateException;
 import ru.practicum.shareit.exceptions.ValidatonException;
-import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.item.utils.ItemMapper;
 import ru.practicum.shareit.item.utils.ItemsValidator;
-import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.utils.UserValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class BookingServiceImpl implements BookingService{
 
     private final BookingRepository br;
-    private final UserService userService;
-    private final ItemService itemService;
     private final ItemsValidator itemsValidator;
     private final UserValidator userValidator;
     private final BookingMapper mapper;
 
     @Autowired
-    public BookingServiceImpl(UserService userService,
-                              ItemService itemService,
-                              ItemsValidator itemsValidator,
+    public BookingServiceImpl(ItemsValidator itemsValidator,
                               UserValidator userValidator,
                               BookingMapper mapper,
                               BookingRepository br) {
-        this.itemService = itemService;
-        this.userService = userService;
         this.itemsValidator = itemsValidator;
         this.userValidator = userValidator;
         this.mapper = mapper;
@@ -206,7 +195,8 @@ public class BookingServiceImpl implements BookingService{
 
     @Override
     public ShortBookingInfo getLastBooking(int itemId) {
-        Booking result = br.findFirstByItem_IdAndEndBeforeOrderByEndDesc(itemId, LocalDateTime.now());
+        Booking result = br.findFirstByItem_IdAndStartBeforeOrderByEndDesc(itemId, LocalDateTime.now());
+        //Booking result = br.findLastBooking()
         return mapper.toShortBookingInfo(result);
     }
 
@@ -217,9 +207,9 @@ public class BookingServiceImpl implements BookingService{
     }
 
     @Override
-    public BookingDto getBookingWithUserBookedItem(int itemId, int userId) {
+    public Booking getBookingWithUserBookedItem(int itemId, int userId) {
         Booking result = br.findFirstByItem_IdAndBooker_IdAndEndIsBeforeAndStatus(
                 itemId, userId, LocalDateTime.now(), BookingStatus.APPROVED);
-        return mapper.toBookingDto(result);
+        return result;
     }
 }

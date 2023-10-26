@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +8,7 @@ import ru.practicum.shareit.booking.dto.ShortBookingInfo;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Data
 @Builder
@@ -25,4 +25,5 @@ public class ItemDto {
     int requestId;
     private ShortBookingInfo lastBooking;
     private ShortBookingInfo nextBooking;
+    private List<CommentDto> comments;
 }

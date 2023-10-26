@@ -1,23 +1,24 @@
 package ru.practicum.shareit.item.utils;
 
-import jdk.jfr.Label;
-import lombok.experimental.UtilityClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.service.ItemService;
 
 @Component
 public class ItemMapper {
 
     private final BookingService bookingService;
+    private final ItemService itemService;
 
     @Autowired
     @Lazy
-    public ItemMapper(BookingService bs) {
+    public ItemMapper(BookingService bs, ItemService is) {
         this.bookingService = bs;
+        this.itemService = is;
     }
 
     public ItemDto toItemDto(Item item) {
@@ -27,6 +28,7 @@ public class ItemMapper {
                 .description(item.getDescription())
                 .available(item.getAvailable())
                 .requestId(item.getRequestId())
+                .comments(itemService.getCommentsByItemId(item.getId()))
                 .build();
     }
 
@@ -49,6 +51,7 @@ public class ItemMapper {
                 .requestId(item.getRequestId())
                 .lastBooking(bookingService.getLastBooking(item.getId()))
                 .nextBooking(bookingService.getNextBooking(item.getId()))
+                .comments(itemService.getCommentsByItemId(item.getId()))
                 .build();
     }
 }

@@ -22,6 +22,6 @@ public interface BookingService {
 
     ShortBookingInfo getNextBooking(int itemId);
 
-    BookingDto getBookingWithUserBookedItem(int itemId, int userId);
+    Booking getBookingWithUserBookedItem(int itemId, int userId);
 
 }

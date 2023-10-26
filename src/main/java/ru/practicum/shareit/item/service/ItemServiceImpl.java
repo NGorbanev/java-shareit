@@ -2,17 +2,27 @@ package ru.practicum.shareit.item.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exceptions.NotAllowedException;
 import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.exceptions.ValidatonException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.storage.CommentsRepository;
 import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.item.utils.CommentMapper;
 import ru.practicum.shareit.item.utils.ItemMapper;
 import ru.practicum.shareit.item.utils.ItemsValidator;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 import ru.practicum.shareit.user.utils.UserMapper;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,16 +34,23 @@ public class ItemServiceImpl implements ItemService {
     private final UserServiceImpl userService;
     private final ItemsValidator validator;
     private final ItemMapper itemMapper;
+    private final CommentsRepository commentsRepository;
+    private final BookingRepository bookingRepository;
 
     @Autowired
     public ItemServiceImpl(ItemRepository itemStorage,
                            UserServiceImpl userService,
                            ItemsValidator validator,
-                           ItemMapper im) {
+                           ItemMapper im,
+                           CommentsRepository commentsRepository,
+                           BookingRepository br) {
         this.itemStorage = itemStorage;
         this.userService = userService;
         this.validator = validator;
         this.itemMapper = im;
+        this.commentsRepository = commentsRepository;
+        this.bookingRepository = br;
+
     }
 
     @Override
@@ -136,4 +153,37 @@ public class ItemServiceImpl implements ItemService {
                                 item.getDescription().toUpperCase().contains(text.toUpperCase())))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public CommentDto addComment(CommentDto commentDto, int itemId, int userId) {
+        Booking booking = Optional.ofNullable(
+                bookingRepository.findFirstByItem_IdAndBooker_IdAndEndIsBeforeAndStatus(
+                        itemId,
+                        userId,
+                        LocalDateTime.now(),
+                        BookingStatus.APPROVED))
+                .orElseThrow(() -> new ValidatonException(
+                        String.format("User id=%s has never booked item id=%s", userId, itemId)));
+        Comment comment = Comment.builder()
+                .text(commentDto.getText())
+                .author(booking.getBooker())
+                .created(LocalDateTime.now())
+                .item(booking.getItem())
+                .build();
+        return CommentMapper.toCommentDto(commentsRepository.save(comment));
+    }
+
+    @Override
+    public List<CommentDto> getCommentsByItemId(int itemId) {
+        List<CommentDto> commentDtos = new ArrayList<>();
+        commentDtos = commentsRepository.findAllByItem_Id(itemId,
+                Sort.by(Sort.Direction.DESC, "created")).stream()
+                .map(CommentMapper::toCommentDto)
+                .collect(Collectors.toList());
+        if (commentDtos == null) {
+            return new ArrayList<>();
+        }
+        return commentDtos;
+    }
+
 }

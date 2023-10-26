@@ -1,8 +1,10 @@
 package ru.practicum.shareit.item.service;
 
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface ItemService {
     Collection<ItemDto> getAllItems();
@@ -18,4 +20,8 @@ public interface ItemService {
     boolean delete(int itemId, int userId);
 
     Collection<ItemDto> search(String text);
+
+    CommentDto addComment(CommentDto commentDto, int itemId, int userId);
+
+    List<CommentDto> getCommentsByItemId(int itemId);
 }

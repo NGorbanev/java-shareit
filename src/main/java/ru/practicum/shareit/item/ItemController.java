@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -55,5 +56,13 @@ public class ItemController {
     public Collection<ItemDto> searchForItem(@NotNull @RequestParam(name = "text") String searchQuery) {
         log.debug(String.format("GET request received. Searching for '%s'", searchQuery));
         return itemService.search(searchQuery);
+    }
+
+    @ResponseBody
+    @PostMapping("/{itemId}/comment")
+    public CommentDto postComment(@Valid @RequestBody CommentDto commentDto,
+                                  @RequestHeader(USER_ID) int userId, @PathVariable int itemId) {
+        log.info("POST request received. Posting comment by userId={} to itemId={}", userId, itemId);
+        return itemService.addComment(commentDto, itemId, userId);
     }
 }
