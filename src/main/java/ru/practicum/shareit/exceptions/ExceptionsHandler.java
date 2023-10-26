@@ -44,7 +44,7 @@ public class ExceptionsHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleConflictException(ConflictException e) {
-        log.warn("Conflict: {}",e.getMessage());
+        log.warn("Conflict: {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
 

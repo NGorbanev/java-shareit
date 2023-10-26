@@ -12,7 +12,7 @@ public class BookingValidator {
     private final BookingService bookingService;
 
     @Autowired
-    public BookingValidator (BookingService bookingService) {
+    public BookingValidator(BookingService bookingService) {
         this.bookingService = bookingService;
     }
 

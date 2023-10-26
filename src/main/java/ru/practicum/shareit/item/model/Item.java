@@ -20,10 +20,10 @@ public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int id;
-    @NotNull @NotEmpty @NotBlank (message = "ItemDto.name is null or empty")
+    @NotNull @NotEmpty @NotBlank(message = "ItemDto.name is null or empty")
     String name;
     String description;
-    @NotNull (message = "ItemDto.available is null")
+    @NotNull(message = "ItemDto.available is null")
     Boolean available;
     @ManyToOne
     @JoinColumn(name = "owner_id")

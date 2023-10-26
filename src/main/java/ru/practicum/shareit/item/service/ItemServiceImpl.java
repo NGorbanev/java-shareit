@@ -157,11 +157,11 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public CommentDto addComment(CommentDto commentDto, int itemId, int userId) {
         Booking booking = Optional.ofNullable(
-                bookingRepository.findFirstByItem_IdAndBooker_IdAndEndIsBeforeAndStatus(
-                        itemId,
-                        userId,
-                        LocalDateTime.now(),
-                        BookingStatus.APPROVED))
+                        bookingRepository.findFirstByItem_IdAndBooker_IdAndEndIsBeforeAndStatus(
+                                itemId,
+                                userId,
+                                LocalDateTime.now(),
+                                BookingStatus.APPROVED))
                 .orElseThrow(() -> new ValidatonException(
                         String.format("User id=%s has never booked item id=%s", userId, itemId)));
         Comment comment = Comment.builder()
@@ -177,7 +177,7 @@ public class ItemServiceImpl implements ItemService {
     public List<CommentDto> getCommentsByItemId(int itemId) {
         List<CommentDto> commentDtos = new ArrayList<>();
         commentDtos = commentsRepository.findAllByItem_Id(itemId,
-                Sort.by(Sort.Direction.DESC, "created")).stream()
+                        Sort.by(Sort.Direction.DESC, "created")).stream()
                 .map(CommentMapper::toCommentDto)
                 .collect(Collectors.toList());
         if (commentDtos == null) {

@@ -36,8 +36,7 @@ public class BookingMapper {
                     .booker(UserMapper.toUserDto(booking.getBooker()))
                     .status(booking.getStatus())
                     .build();
-        }
-        else {
+        } else {
             throw new ValidatonException("Unable to convert Booking to BookingDto");
         }
     }
@@ -55,7 +54,7 @@ public class BookingMapper {
         }
     }
 
-    public Booking toBooking (IncomingBookingDto input, int bookerId) {
+    public Booking toBooking(IncomingBookingDto input, int bookerId) {
         return Booking.builder()
                 .start(input.getStart())
                 .end(input.getEnd())

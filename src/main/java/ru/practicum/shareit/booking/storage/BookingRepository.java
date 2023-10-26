@@ -11,17 +11,27 @@ import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
     List<Booking> findByBookerId(int bookerId, Sort sort);
-    List<Booking> findByBookerIdAndStartIsBeforeAndEndIsAfter (
+
+    List<Booking> findByBookerIdAndStartIsBeforeAndEndIsAfter(
             int userId, LocalDateTime start, LocalDateTime end, Sort sort);
+
     List<Booking> findByBookerIdAndEndIsBefore(int userId, LocalDateTime end, Sort sort);
+
     List<Booking> findByBookerIdAndStartIsAfter(int userId, LocalDateTime start, Sort sort);
+
     List<Booking> findByBookerIdAndStatus(int userId, BookingStatus status, Sort sort);
+
     List<Booking> findByItem_Owner_Id(int userId, Sort sort);
+
     List<Booking> findByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(
             int userId, LocalDateTime start, LocalDateTime end, Sort sort);
-    List<Booking> findByItem_Owner_IdAndStartIsAfter (int userId, LocalDateTime start, Sort sort);
+
+    List<Booking> findByItem_Owner_IdAndStartIsAfter(int userId, LocalDateTime start, Sort sort);
+
     List<Booking> findByItem_Owner_IdAndEndIsBefore(int userId, LocalDateTime end, Sort sort);
+
     List<Booking> findByItem_Owner_IdAndStatus(int userId, BookingStatus status, Sort sort);
+
     Booking findFirstByItem_IdAndStartBeforeOrderByEndDesc(int itemId, LocalDateTime end);
 
     Booking findFirstByItem_IdAndBooker_IdAndEndIsBeforeAndStatus(

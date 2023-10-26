@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class BookingServiceImpl implements BookingService{
+public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository br;
     private final ItemsValidator itemsValidator;
@@ -54,8 +54,8 @@ public class BookingServiceImpl implements BookingService{
         // Because this check is already performed at Booking class and at database.
         if (incomingBookingDto.getStart().isBefore(LocalDateTime.now()) || (
                 incomingBookingDto.getEnd().equals(incomingBookingDto.getStart()) ||
-                incomingBookingDto.getEnd().isBefore(incomingBookingDto.getStart())
-                )) {
+                        incomingBookingDto.getEnd().isBefore(incomingBookingDto.getStart())
+        )) {
             throw new ValidatonException("Wrong start or end date");
         }
         Booking newBooking = mapper.toBooking(incomingBookingDto, bookerId);
@@ -196,7 +196,6 @@ public class BookingServiceImpl implements BookingService{
     @Override
     public ShortBookingInfo getLastBooking(int itemId) {
         Booking result = br.findFirstByItem_IdAndStartBeforeOrderByEndDesc(itemId, LocalDateTime.now());
-        //Booking result = br.findLastBooking()
         return mapper.toShortBookingInfo(result);
     }
 
