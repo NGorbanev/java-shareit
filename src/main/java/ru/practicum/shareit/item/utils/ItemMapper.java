@@ -16,9 +16,9 @@ public class ItemMapper {
 
     @Autowired
     @Lazy
-    public ItemMapper(BookingService bs, ItemService is) {
-        this.bookingService = bs;
-        this.itemService = is;
+    public ItemMapper(BookingService bookingService, ItemService itemService) {
+        this.bookingService = bookingService;
+        this.itemService = itemService;
     }
 
     public ItemDto toItemDto(Item item) {

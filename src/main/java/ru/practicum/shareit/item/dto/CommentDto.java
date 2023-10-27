@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import ru.practicum.shareit.item.model.Item;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import java.time.LocalDateTime;
 
@@ -15,7 +14,6 @@ import java.time.LocalDateTime;
 @Builder
 public class CommentDto {
     private int id;
-    @NotBlank
     @NotEmpty
     private String text;
 

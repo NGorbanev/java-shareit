@@ -22,12 +22,14 @@ import ru.practicum.shareit.item.utils.ItemsValidator;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 import ru.practicum.shareit.user.utils.UserMapper;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@Transactional
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemStorage;
@@ -55,15 +57,18 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> getAllItems() {
+        log.info("getAllItems servicing...");
         Collection<ItemDto> result = new ArrayList<>();
         for (Item i : itemStorage.findAll()) {
             result.add(itemMapper.toItemDto(i));
         }
+        log.info("getAllItems is serviced");
         return result;
     }
 
     @Override
     public Collection<ItemDto> getAllItemsOfUser(int userId) {
+        log.info("getAllItemsOfUser servicing...");
         List<Item> items = itemStorage.findAll().stream()
                 .filter(itemDto -> itemDto.getOwner().getId() == userId)
                 .collect(Collectors.toList());
@@ -71,34 +76,44 @@ public class ItemServiceImpl implements ItemService {
         for (Item i : items) {
             result.add(itemMapper.itemDtoExtended(i));
         }
+        log.info("getAllItemsOfUser is serviced");
         return result;
     }
 
     @Override
     public ItemDto create(ItemDto itemDto, Integer userId) {
+        log.info("Create for itemDto '{}', owerId={}", itemDto.getName(), userId);
         Item item = itemMapper.toItem(itemDto);
         item.setOwner(UserMapper.toUser(userService.getUser(userId)));
         validator.validateItem(item);
+        log.info("Create method serviced");
         return itemMapper.toItemDto(itemStorage.save(item));
     }
 
     @Override
     public ItemDto get(int itemId, int userId) {
+        log.info("Get itemId={} from userId={} received", itemId, userId);
         Optional<Item> item = itemStorage.findById(itemId);
         if (item.isPresent()) {
+            log.info("Item id={} found", itemId);
             if (validator.ownerMatch(itemId, userId)) {
+                log.info("Returning Item id={} extended info", itemId);
                 return itemMapper.itemDtoExtended(item.get());
             } else {
+                log.info("Returning Item id={} regular info", itemId);
                 return itemMapper.toItemDto(item.get());
             }
         } else {
+            log.warn("Item id={} not found", itemId);
             throw new NotFoundException(String.format("Item id=%s not found", itemId));
         }
     }
 
     @Override
     public ItemDto update(int itemId, ItemDto itemTransferName, int user) {
+        log.info("Update request for itemId={} by userId={} servicing", itemId, user);
         if (!validator.ownerMatch(itemId, user)) {
+            log.info("Item id={} found", itemId);
             throw new NotAllowedException(itemTransferName, user);
         }
         Optional<Item> item = itemStorage.findById(itemId);
@@ -126,6 +141,7 @@ public class ItemServiceImpl implements ItemService {
             } else {
                 itemForUpdate.setRequestId(item.get().getRequestId());
             }
+            log.info("ItemId={} is updating..", itemId);
             return itemMapper.toItemDto(itemStorage.save(itemForUpdate));
         } else {
             throw new NotFoundException(itemTransferName);
@@ -134,19 +150,25 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public boolean delete(int itemId, int userId) {
+        log.info("Delete itemId={} by userId={} request is servicing", itemId, userId);
         if (!validator.ownerMatch(itemId, userId)) {
+            log.warn("UserId={} can't delete itemId={} because user is not the owner if item", userId, itemId);
             throw new NotAllowedException(
                     String.format("User id=%s is not allowed to delete item id=%s", userId, itemId));
         }
+        log.info("Deleting itemId={}", itemId);
         itemStorage.deleteById(itemId);
         return true;
     }
 
     @Override
     public Collection<ItemDto> search(String text) {
+        log.info("Search request for string '{}' is servicing..", text);
         if (text.isEmpty()) {
+            log.warn("Text is empty. Nothing to search");
             return Collections.emptyList();
         }
+        log.info("Getting search results");
         return getAllItems().stream()
                 .filter(item -> item.getAvailable() &&
                         (item.getName().toUpperCase().contains(text.toUpperCase()) ||
@@ -156,6 +178,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto addComment(CommentDto commentDto, int itemId, int userId) {
+        log.info("AddComment request received. Processing..");
         Booking booking = Optional.ofNullable(
                         bookingRepository.findFirstByItem_IdAndBooker_IdAndEndIsBeforeAndStatus(
                                 itemId,
@@ -170,19 +193,23 @@ public class ItemServiceImpl implements ItemService {
                 .created(LocalDateTime.now())
                 .item(booking.getItem())
                 .build();
+        log.info("addComment is worked out");
         return CommentMapper.toCommentDto(commentsRepository.save(comment));
     }
 
     @Override
     public List<CommentDto> getCommentsByItemId(int itemId) {
+        log.info("getCommentsByItemId request received. Processing..");
         List<CommentDto> commentDtos = new ArrayList<>();
         commentDtos = commentsRepository.findAllByItem_Id(itemId,
                         Sort.by(Sort.Direction.DESC, "created")).stream()
                 .map(CommentMapper::toCommentDto)
                 .collect(Collectors.toList());
         if (commentDtos == null) {
+            log.info("No comments found for item={}", itemId);
             return new ArrayList<>();
         }
+        log.info("getCommentsByItemId is worked out");
         return commentDtos;
     }
 
