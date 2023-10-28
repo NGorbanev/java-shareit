@@ -5,27 +5,19 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.booking.model.BookingStatus;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.dto.UserDto;
 
 import javax.validation.constraints.Future;
 import javax.validation.constraints.FutureOrPresent;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Data
-@Builder
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class BookingDto {
-    int id;
-    @NotNull
+public class IncomingBookingDto {
+    int itemId;
     @FutureOrPresent
     LocalDateTime start;
     @Future
     LocalDateTime end;
-    ItemDto item;
-    UserDto booker;
-    BookingStatus status;
 }

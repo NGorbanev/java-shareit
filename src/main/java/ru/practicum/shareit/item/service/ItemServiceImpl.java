@@ -2,82 +2,125 @@ package ru.practicum.shareit.item.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exceptions.NotAllowedException;
 import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.exceptions.ValidatonException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.item.storage.CommentsRepository;
+import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.item.utils.CommentMapper;
 import ru.practicum.shareit.item.utils.ItemMapper;
 import ru.practicum.shareit.item.utils.ItemsValidator;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.service.UserServiceImpl;
+import ru.practicum.shareit.user.utils.UserMapper;
 
+import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@Transactional
 public class ItemServiceImpl implements ItemService {
-    private final ItemStorage itemStorage;
-    private final UserStorage userStorage;
+
+    private final ItemRepository itemStorage;
+    private final UserServiceImpl userService;
     private final ItemsValidator validator;
+    private final ItemMapper itemMapper;
+    private final CommentsRepository commentsRepository;
+    private final BookingRepository bookingRepository;
 
     @Autowired
-    public ItemServiceImpl(ItemStorage itemStorage, UserStorage userStorage, ItemsValidator validator) {
+    public ItemServiceImpl(ItemRepository itemStorage,
+                           UserServiceImpl userService,
+                           ItemsValidator validator,
+                           ItemMapper im,
+                           CommentsRepository commentsRepository,
+                           BookingRepository br) {
         this.itemStorage = itemStorage;
-        this.userStorage = userStorage;
+        this.userService = userService;
         this.validator = validator;
+        this.itemMapper = im;
+        this.commentsRepository = commentsRepository;
+        this.bookingRepository = br;
+
     }
 
     @Override
     public Collection<ItemDto> getAllItems() {
+        log.info("getAllItems servicing...");
         Collection<ItemDto> result = new ArrayList<>();
-        for (Item i : itemStorage.getAll()) {
-            result.add(ItemMapper.toItemDto(i));
+        for (Item i : itemStorage.findAll()) {
+            result.add(itemMapper.toItemDto(i));
         }
+        log.info("getAllItems is serviced");
         return result;
     }
 
     @Override
     public Collection<ItemDto> getAllItemsOfUser(int userId) {
-        List<Item> items = itemStorage.getAll().stream()
-                .filter(itemDto -> itemDto.getOwnerId() == userId)
+        log.info("getAllItemsOfUser servicing...");
+        List<Item> items = itemStorage.findAll().stream()
+                .filter(itemDto -> itemDto.getOwner().getId() == userId)
                 .collect(Collectors.toList());
         ArrayList<ItemDto> result = new ArrayList<>();
         for (Item i : items) {
-            result.add(ItemMapper.toItemDto(i));
+            result.add(itemMapper.itemDtoExtended(i));
         }
+        log.info("getAllItemsOfUser is serviced");
         return result;
     }
 
     @Override
     public ItemDto create(ItemDto itemDto, Integer userId) {
-        Item item = ItemMapper.toItem(itemDto);
-        item.setOwnerId(userId);
+        log.info("Create for itemDto '{}', owerId={}", itemDto.getName(), userId);
+        Item item = itemMapper.toItem(itemDto);
+        item.setOwner(UserMapper.toUser(userService.getUser(userId)));
         validator.validateItem(item);
-        return ItemMapper.toItemDto(itemStorage.addItem(item));
+        log.info("Create method serviced");
+        return itemMapper.toItemDto(itemStorage.save(item));
     }
 
     @Override
-    public ItemDto get(int itemId) {
-        Optional<Item> item = itemStorage.getItemById(itemId);
+    public ItemDto get(int itemId, int userId) {
+        log.info("Get itemId={} from userId={} received", itemId, userId);
+        Optional<Item> item = itemStorage.findById(itemId);
         if (item.isPresent()) {
-            return ItemMapper.toItemDto(item.get());
+            log.info("Item id={} found", itemId);
+            if (validator.ownerMatch(itemId, userId)) {
+                log.info("Returning Item id={} extended info", itemId);
+                return itemMapper.itemDtoExtended(item.get());
+            } else {
+                log.info("Returning Item id={} regular info", itemId);
+                return itemMapper.toItemDto(item.get());
+            }
         } else {
+            log.warn("Item id={} not found", itemId);
             throw new NotFoundException(String.format("Item id=%s not found", itemId));
         }
     }
 
     @Override
     public ItemDto update(int itemId, ItemDto itemTransferName, int user) {
+        log.info("Update request for itemId={} by userId={} servicing", itemId, user);
         if (!validator.ownerMatch(itemId, user)) {
+            log.info("Item id={} found", itemId);
             throw new NotAllowedException(itemTransferName, user);
         }
-        Optional<Item> item = itemStorage.getItemById(itemId);
+        Optional<Item> item = itemStorage.findById(itemId);
         if (item.isPresent()) {
-            Item itemForUpdate = ItemMapper.toItem(itemTransferName);
-            itemForUpdate.setOwnerId(item.get().getOwnerId());
+            Item itemForUpdate = itemMapper.toItem(itemTransferName);
             itemForUpdate.setId(itemId);
+            itemForUpdate.setOwner(item.get().getOwner());
             if (itemTransferName.getName() != null) {
                 itemForUpdate.setName(itemTransferName.getName());
             } else {
@@ -98,7 +141,8 @@ public class ItemServiceImpl implements ItemService {
             } else {
                 itemForUpdate.setRequestId(item.get().getRequestId());
             }
-            return ItemMapper.toItemDto(itemStorage.updateItem(itemForUpdate));
+            log.info("ItemId={} is updating..", itemId);
+            return itemMapper.toItemDto(itemStorage.save(itemForUpdate));
         } else {
             throw new NotFoundException(itemTransferName);
         }
@@ -106,26 +150,67 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public boolean delete(int itemId, int userId) {
+        log.info("Delete itemId={} by userId={} request is servicing", itemId, userId);
         if (!validator.ownerMatch(itemId, userId)) {
+            log.warn("UserId={} can't delete itemId={} because user is not the owner if item", userId, itemId);
             throw new NotAllowedException(
                     String.format("User id=%s is not allowed to delete item id=%s", userId, itemId));
         }
-        if (itemStorage.removeItemById(itemId)) {
-            return true;
-        } else {
-            return false;
-        }
+        log.info("Deleting itemId={}", itemId);
+        itemStorage.deleteById(itemId);
+        return true;
     }
 
     @Override
     public Collection<ItemDto> search(String text) {
+        log.info("Search request for string '{}' is servicing..", text);
         if (text.isEmpty()) {
+            log.warn("Text is empty. Nothing to search");
             return Collections.emptyList();
         }
+        log.info("Getting search results");
         return getAllItems().stream()
                 .filter(item -> item.getAvailable() &&
                         (item.getName().toUpperCase().contains(text.toUpperCase()) ||
                                 item.getDescription().toUpperCase().contains(text.toUpperCase())))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public CommentDto addComment(CommentDto commentDto, int itemId, int userId) {
+        log.info("AddComment request received. Processing..");
+        Booking booking = Optional.ofNullable(
+                        bookingRepository.findFirstByItem_IdAndBooker_IdAndEndIsBeforeAndStatus(
+                                itemId,
+                                userId,
+                                LocalDateTime.now(),
+                                BookingStatus.APPROVED))
+                .orElseThrow(() -> new ValidatonException(
+                        String.format("User id=%s has never booked item id=%s", userId, itemId)));
+        Comment comment = Comment.builder()
+                .text(commentDto.getText())
+                .author(booking.getBooker())
+                .created(LocalDateTime.now())
+                .item(booking.getItem())
+                .build();
+        log.info("addComment is worked out");
+        return CommentMapper.toCommentDto(commentsRepository.save(comment));
+    }
+
+    @Override
+    public List<CommentDto> getCommentsByItemId(int itemId) {
+        log.info("getCommentsByItemId request received. Processing..");
+        List<CommentDto> commentDtos = new ArrayList<>();
+        commentDtos = commentsRepository.findAllByItem_Id(itemId,
+                        Sort.by(Sort.Direction.DESC, "created")).stream()
+                .map(CommentMapper::toCommentDto)
+                .collect(Collectors.toList());
+        if (commentDtos == null) {
+            log.info("No comments found for item={}", itemId);
+            return new ArrayList<>();
+        }
+        log.info("getCommentsByItemId is worked out");
+        return commentDtos;
+    }
+
 }
