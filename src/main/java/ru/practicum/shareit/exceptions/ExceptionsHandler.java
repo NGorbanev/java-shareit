@@ -76,4 +76,10 @@ public class ExceptionsHandler {
         log.warn("Constraint exception: " + e.getMessage());
         return new ErrorResponse("Constraint exception " + e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleItemRequestNotFoundException(final ItemRequestNotFound ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
 }

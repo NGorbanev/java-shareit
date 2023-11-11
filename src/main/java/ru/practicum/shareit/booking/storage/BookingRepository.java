@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking.storage;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,27 +14,28 @@ import java.util.List;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
-    List<Booking> findByBookerId(int bookerId, Sort sort);
 
-    List<Booking> findByBookerIdAndStartIsBeforeAndEndIsAfter(
-            int userId, LocalDateTime start, LocalDateTime end, Sort sort);
+    Page<Booking> findByBookerId(int bookerId, Pageable pageable);
 
-    List<Booking> findByBookerIdAndEndIsBefore(int userId, LocalDateTime end, Sort sort);
+    Page<Booking> findByBookerIdAndStartIsBeforeAndEndIsAfter(
+            int userId, LocalDateTime start, LocalDateTime end, Pageable pageable);
 
-    List<Booking> findByBookerIdAndStartIsAfter(int userId, LocalDateTime start, Sort sort);
+    Page<Booking> findByBookerIdAndEndIsBefore(int userId, LocalDateTime end, Pageable pageable);
 
-    List<Booking> findByBookerIdAndStatus(int userId, BookingStatus status, Sort sort);
+    Page<Booking> findByBookerIdAndStartIsAfter(int userId, LocalDateTime start, Pageable pageable);
 
-    List<Booking> findByItem_Owner_Id(int userId, Sort sort);
+    Page<Booking> findByBookerIdAndStatus(int userId, BookingStatus status, Pageable pageable);
 
-    List<Booking> findByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(
-            int userId, LocalDateTime start, LocalDateTime end, Sort sort);
+    Page<Booking> findByItem_Owner_Id(int userId, Pageable pageable);
 
-    List<Booking> findByItem_Owner_IdAndStartIsAfter(int userId, LocalDateTime start, Sort sort);
+    Page<Booking> findByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(
+            int userId, LocalDateTime start, LocalDateTime end, Pageable pageable);
 
-    List<Booking> findByItem_Owner_IdAndEndIsBefore(int userId, LocalDateTime end, Sort sort);
+    Page<Booking> findByItem_Owner_IdAndStartIsAfter(int userId, LocalDateTime start, Pageable pageable);
 
-    List<Booking> findByItem_Owner_IdAndStatus(int userId, BookingStatus status, Sort sort);
+    Page<Booking> findByItem_Owner_IdAndEndIsBefore(int userId, LocalDateTime end, Pageable pageable);
+
+    Page<Booking> findByItem_Owner_IdAndStatus(int userId, BookingStatus status, Pageable pageable);
 
     Booking findFirstByItem_IdAndStartBeforeOrderByEndDesc(int itemId, LocalDateTime end);
 

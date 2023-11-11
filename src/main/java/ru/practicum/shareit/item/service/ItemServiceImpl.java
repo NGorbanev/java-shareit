@@ -27,6 +27,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 @Slf4j
 @Transactional
@@ -71,7 +73,7 @@ public class ItemServiceImpl implements ItemService {
         log.info("getAllItemsOfUser servicing...");
         List<Item> items = itemStorage.findAll().stream()
                 .filter(itemDto -> itemDto.getOwner().getId() == userId)
-                .collect(Collectors.toList());
+                .collect(toList());
         ArrayList<ItemDto> result = new ArrayList<>();
         for (Item i : items) {
             result.add(itemMapper.itemDtoExtended(i));
@@ -173,7 +175,7 @@ public class ItemServiceImpl implements ItemService {
                 .filter(item -> item.getAvailable() &&
                         (item.getName().toUpperCase().contains(text.toUpperCase()) ||
                                 item.getDescription().toUpperCase().contains(text.toUpperCase())))
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     @Override
@@ -204,7 +206,7 @@ public class ItemServiceImpl implements ItemService {
         commentDtos = commentsRepository.findAllByItem_Id(itemId,
                         Sort.by(Sort.Direction.DESC, "created")).stream()
                 .map(CommentMapper::toCommentDto)
-                .collect(Collectors.toList());
+                .collect(toList());
         if (commentDtos == null) {
             log.info("No comments found for item={}", itemId);
             return new ArrayList<>();
@@ -213,4 +215,11 @@ public class ItemServiceImpl implements ItemService {
         return commentDtos;
     }
 
+    @Override
+    public List<ItemDto> getItemsByRequestId(int requestId) {
+        return itemStorage.findAllByRequestId(requestId,
+                Sort.by(Sort.Direction.DESC, "id")).stream()
+                .map(itemMapper::toItemDto)
+                .collect(toList());
+    }
 }
