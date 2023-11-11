@@ -10,6 +10,8 @@ import java.util.List;
 
 public interface ItemRequestRepository extends PagingAndSortingRepository<ItemRequest, Integer> {
     List<ItemRequest> findAllByRequesterId(int requesterId, Sort sort);
+
     Page<ItemRequest> findAllByRequesterIdNot(int userId, Pageable pageable);
+
     List<ItemRequest> findAllByRequesterIdNotOrderByCreatedDesc(int userId);
 }

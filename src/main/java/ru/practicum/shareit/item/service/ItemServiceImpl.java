@@ -25,7 +25,7 @@ import ru.practicum.shareit.user.utils.UserMapper;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 import static java.util.stream.Collectors.toList;
 
@@ -218,7 +218,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getItemsByRequestId(int requestId) {
         return itemStorage.findAllByRequestId(requestId,
-                Sort.by(Sort.Direction.DESC, "id")).stream()
+                        Sort.by(Sort.Direction.DESC, "id")).stream()
                 .map(itemMapper::toItemDto)
                 .collect(toList());
     }

@@ -34,7 +34,7 @@ public class Pagination {
             totalPages = index + 1;
             if ((from < size) && (!from.equals(0))) {
                 totalPages = size / from + index;
-                if (size % from !=0) {
+                if (size % from != 0) {
                     totalPages++;
                 }
             }

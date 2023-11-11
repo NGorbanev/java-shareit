@@ -26,16 +26,16 @@ import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service
-public class ItemRequestServiceImpl implements ItemRequestService{
+public class ItemRequestServiceImpl implements ItemRequestService {
 
     private final ItemRequestRepository repository;
     private final ItemRequestMapper itemRequestMapper;
     private final UserService userService;
 
     @Autowired
-    public ItemRequestServiceImpl (ItemRequestRepository repository,
-                                   ItemRequestMapper itemRequestMapper,
-                                   UserService userService) {
+    public ItemRequestServiceImpl(ItemRequestRepository repository,
+                                  ItemRequestMapper itemRequestMapper,
+                                  UserService userService) {
         this.repository = repository;
         this.itemRequestMapper = itemRequestMapper;
         this.userService = userService;
