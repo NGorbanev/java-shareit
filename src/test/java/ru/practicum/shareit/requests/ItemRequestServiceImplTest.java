@@ -7,7 +7,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.exceptions.ItemRequestNotFound;
-import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.request.service.ItemRequestServiceImpl;
 import ru.practicum.shareit.request.storage.ItemRequestRepository;

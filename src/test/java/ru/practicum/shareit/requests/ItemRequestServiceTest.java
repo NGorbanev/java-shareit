@@ -12,11 +12,8 @@ import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @SpringBootTest
 @Transactional
