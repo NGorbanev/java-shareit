@@ -115,7 +115,6 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto update(int itemId, ItemDto itemTransferName, int user) {
         log.info("Update request for itemId={} by userId={} servicing", itemId, user);
         if (!validator.ownerMatch(itemId, user)) {
-            log.info("Item id={} found", itemId);
             throw new NotAllowedException(itemTransferName, user);
         }
         Optional<Item> item = itemStorage.findById(itemId);
@@ -146,7 +145,7 @@ public class ItemServiceImpl implements ItemService {
             log.info("ItemId={} is updating..", itemId);
             return itemMapper.toItemDto(itemStorage.save(itemForUpdate));
         } else {
-            throw new NotFoundException(itemTransferName);
+            throw new NotFoundException(String.format("Object not found: %s", itemTransferName));
         }
     }
 

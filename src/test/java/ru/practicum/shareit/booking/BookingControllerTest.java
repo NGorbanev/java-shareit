@@ -11,10 +11,12 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.IncomingBookingDto;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exceptions.UnknownStateException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -106,6 +108,22 @@ public class BookingControllerTest {
     }
 
     @Test
+    public void UnknownStateExceptionResponseTest() throws Exception {
+        when(bookingService.getBookingById(any(int.class), any(int.class)))
+                .thenThrow(new UnknownStateException("SOMESTATE"));
+        mvc.perform(get("/bookings/1")
+                        .content(mapper.writeValueAsString(bookingDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(USER_ID, 1))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertEquals(
+                        "Unknown state: SOMESTATE", result.getResolvedException().getMessage()));
+
+    }
+
+    @Test
     public void getBookings() throws Exception {
         when(bookingService.getBookingsPageable(
                 any(String.class),
@@ -113,11 +131,11 @@ public class BookingControllerTest {
                 any(Integer.class),
                 nullable(Integer.class))).thenReturn(List.of(bookingDto));
         mvc.perform(get("/bookings")
-                .content(mapper.writeValueAsString(bookingDtoList))
-                .characterEncoding(StandardCharsets.UTF_8)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header(USER_ID, 1))
+                        .content(mapper.writeValueAsString(bookingDtoList))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(USER_ID, 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id", is(bookingDto.getId()), int.class))
                 .andExpect(jsonPath("$.[0].start",

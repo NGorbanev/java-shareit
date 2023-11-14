@@ -7,6 +7,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.exceptions.ValidatonException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -156,6 +159,19 @@ public class ItemControllerTest {
     }
 
     @Test
+    public void validationExceptionResponseTest() throws Exception {
+        when(itemService.addComment(any(), any(int.class), any(int.class)))
+                .thenThrow(new ValidatonException("User id=1 has never booked item id=1"));
+        mvc.perform(post("/items/1/comment")
+                        .content(mapper.writeValueAsString(commentDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(USER_ID, 1))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void updateItemTest() throws Exception {
         when(itemService.update(any(int.class), any(), any(int.class))).thenReturn(itemDto);
         mvc.perform(patch("/items/1")
@@ -170,5 +186,34 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$.name", is(itemDto.getName())))
                 .andExpect(jsonPath("$.description", is(itemDto.getDescription())))
                 .andExpect(jsonPath("$.available", is(itemDto.getAvailable())));
+    }
+
+    // ExceptionsHandlerTests (for maximise coverage)
+    @Test
+    public void notFoundExceptionTest() throws Exception {
+        when(itemService.get(any(int.class), any(int.class))).thenThrow(new NotFoundException(String.format("Item id=%s not found", 1)));
+        mvc.perform(get("/items/1")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(USER_ID, 1))
+                .andExpect(status().isNotFound())
+                .andExpect(mvc -> mvc.getResolvedException().getClass().equals(NotFoundException.class))
+                .andExpect(result -> assertEquals(
+                        "Object not found: Item id=1 not found", result.getResolvedException().getMessage()));
+    }
+
+    @Test
+    public void npeExceptionTest() throws Exception {
+        when(itemService.get(any(int.class), any(int.class))).thenThrow(new NullPointerException("Some reason"));
+        mvc.perform(get("/items/1")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(USER_ID, 1))
+                .andExpect(status().isBadRequest())
+                .andExpect(mvc -> mvc.getResolvedException().getClass().equals(NotFoundException.class))
+                .andExpect(result -> assertEquals(
+                        "Some reason", result.getResolvedException().getMessage()));
     }
 }

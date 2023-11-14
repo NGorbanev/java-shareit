@@ -3,7 +3,6 @@ package ru.practicum.shareit.exceptions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -47,13 +46,6 @@ public class ExceptionsHandler {
     public ErrorResponse handleConflictException(ConflictException e) {
         log.warn("Conflict: {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleSpringvalidatorExceptoions(MethodArgumentNotValidException e) {
-        log.warn("Validate exception: {}", e.getMessage());
-        return new ErrorResponse("Validation error: required fields are absent");
     }
 
     @ExceptionHandler

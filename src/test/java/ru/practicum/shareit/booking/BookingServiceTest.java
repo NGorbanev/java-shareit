@@ -157,9 +157,10 @@ public class BookingServiceTest {
                 .end(LocalDateTime.now().plusSeconds(15))
                 .build();
         bookingService.create(incomingBookingDto, newUserDto.getId());
-        Assertions.assertThrows(UnknownStateException.class,
+        final UnknownStateException exception = Assertions.assertThrows(UnknownStateException.class,
                 () -> bookingService.getBookingsPageable(
                         "SOMESTATUS", newUserDto.getId(), 0, null));
+        Assertions.assertEquals("Unknown state: SOMESTATUS", exception.getMessage());
     }
 
     @Test
