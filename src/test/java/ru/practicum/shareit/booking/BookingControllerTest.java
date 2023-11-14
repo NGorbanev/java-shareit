@@ -108,7 +108,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    public void UnknownStateExceptionResponseTest() throws Exception {
+    public void unknownStateExceptionResponseTest() throws Exception {
         when(bookingService.getBookingById(any(int.class), any(int.class)))
                 .thenThrow(new UnknownStateException("SOMESTATE"));
         mvc.perform(get("/bookings/1")
