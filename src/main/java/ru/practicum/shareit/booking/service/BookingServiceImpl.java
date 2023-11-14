@@ -2,7 +2,6 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -53,18 +52,12 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto create(IncomingBookingDto incomingBookingDto, int bookerId) {
         log.info("Booking request from userId={} to itemId={}", bookerId, incomingBookingDto.getItemId());
-        if (!userValidator.validateUserById(bookerId)) {
-            log.warn("User not found");
-            throw new NotFoundException(String.format("User id=%s not found", bookerId));
-        }
+        userValidator.validateUserById(bookerId);
         if (!itemsValidator.isAvailable(incomingBookingDto.getItemId())) {
             log.warn("Item is not available for booking");
             throw new ValidatonException(
                     String.format("Item id=%s is not available for booking", incomingBookingDto.getItemId()));
         }
-
-        // Next check (for dates) was added only for passing Postman tests.
-        // Because this check is already performed at Booking class and at database.
         if (incomingBookingDto.getStart().isBefore(LocalDateTime.now()) || (
                 incomingBookingDto.getEnd().equals(incomingBookingDto.getStart()) ||
                         incomingBookingDto.getEnd().isBefore(incomingBookingDto.getStart())
@@ -78,29 +71,15 @@ public class BookingServiceImpl implements BookingService {
                     incomingBookingDto.getItemId(), bookerId);
             throw new NotFoundException("Booking can't be made by item's owner");
         }
-
-        try {
-            BookingDto result = mapper.toBookingDto(bookingRepository.save(newBooking));
-            log.info("Creation of booking id={} performed", result.getId());
-            return result;
-        } catch (DataIntegrityViolationException e) {
-            log.warn("Wrong booking dates: start: {}, end: {}",
-                    incomingBookingDto.getStart(),
-                    incomingBookingDto.getEnd());
-            throw new ValidatonException(
-                    String.format("Wrong booking dates: Start: %s, end: %s",
-                            incomingBookingDto.getStart(),
-                            incomingBookingDto.getEnd()));
-        }
+        BookingDto result = mapper.toBookingDto(bookingRepository.save(newBooking));
+        log.info("Creation of booking id={} performed", result.getId());
+        return result;
     }
 
     @Override
     public BookingDto update(int bookingId, int userId, Boolean approved) {
         log.info("UPDATE method for bookingId={}, from userId={}, approved={}", bookingId, userId, approved);
-        if (!userValidator.validateUserById(userId)) {
-            log.warn("User id={} not found", userId);
-            throw new NotFoundException(String.format("User id=%s not found", userId));
-        }
+        userValidator.validateUserById(userId);
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new NotFoundException(
                 String.format("Booking id=%s was not found", bookingId)
         ));
@@ -140,10 +119,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto getBookingById(int bookingId, int userId) {
         log.info("getBookingById request received");
-        if (!userValidator.validateUserById(userId)) {
-            log.warn("User id={} not found", userId);
-            throw new NotFoundException(String.format("User id=%s not found", userId));
-        }
+        userValidator.validateUserById(userId);
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(
                 () -> new NotFoundException(String.format("Booking id=%s was not found", bookingId)));
         if (itemsValidator.ownerMatch(booking.getItem().getId(), userId) ||
@@ -159,10 +135,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> getBookingsPageable(String state, int userId, Integer from, Integer size) {
         log.info("getBookings with pagination request received");
-        if (!userValidator.validateUserById(userId)) {
-            log.warn("User id={} not found", userId);
-            throw new NotFoundException(String.format("User id=%s not found", userId));
-        }
+        userValidator.validateUserById(userId);
         List<BookingDto> result = new ArrayList<>();
         Pageable pageable;
         Sort sort = Sort.by(Sort.Direction.DESC, "start");
@@ -219,10 +192,7 @@ public class BookingServiceImpl implements BookingService {
 
     public List<BookingDto> getBookingsOwner(String state, int userId, Integer from, Integer size) {
         log.info("getBookingsOwner request received");
-        if (!userValidator.validateUserById(userId)) {
-            log.warn("User id={} not found", userId);
-            throw new NotFoundException(String.format("User id=%s not found", userId));
-        }
+        userValidator.validateUserById(userId);
         List<BookingDto> result = new ArrayList<>();
         Pageable pageable;
         Sort sort = Sort.by(Sort.Direction.DESC, "start");
@@ -293,12 +263,5 @@ public class BookingServiceImpl implements BookingService {
     public ShortBookingInfo getNextBooking(int itemId) {
         Booking result = bookingRepository.findNextBooking(itemId);
         return mapper.toShortBookingInfo(result);
-    }
-
-    @Override
-    public Booking getBookingWithUserBookedItem(int itemId, int userId) {
-        Booking result = bookingRepository.findFirstByItem_IdAndBooker_IdAndEndIsBeforeAndStatus(
-                itemId, userId, LocalDateTime.now(), BookingStatus.APPROVED);
-        return result;
     }
 }

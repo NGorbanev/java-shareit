@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.ItemRequestNotFound;
-import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.storage.ItemRequestRepository;
@@ -20,7 +19,6 @@ import ru.practicum.shareit.utils.Pagination;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
@@ -52,9 +50,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public ItemRequestDto getItemRequestById(int itemRequestId, int userId) {
         log.info("Get item request by id received");
-        UserDto userDto = Optional.ofNullable(userService.getUser(userId)).orElseThrow(
-                () -> new NotFoundException(String.format("User id=%s was not found", userId))
-        );
+        UserDto userDto = userService.getUser(userId);
         ItemRequest itemRequest = repository.findById(itemRequestId).orElseThrow(
                 () -> new ItemRequestNotFound(String.format("Item request id=%s not found", itemRequestId)));
         return itemRequestMapper.toItemRequestDto(itemRequest);
@@ -63,9 +59,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequestDto> getOwnItemRequests(int requesterId) {
         log.info("Get Own Item Requests received");
-        UserDto userDto = Optional.ofNullable(userService.getUser(requesterId)).orElseThrow(
-                () -> new NotFoundException(String.format("User id=%s was not found", requesterId))
-        );
+        UserDto userDto = userService.getUser(requesterId);
         return repository.findAllByRequesterId(requesterId, Sort.by(Sort.Direction.DESC, "created")).stream()
                 .map(itemRequestMapper::toItemRequestDto)
                 .collect(toList());
@@ -74,9 +68,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequestDto> getAllItemRequests(int userId, Integer from, Integer size) {
         log.info("Get All item Requests received");
-        UserDto userDto = Optional.ofNullable(userService.getUser(userId)).orElseThrow(
-                () -> new NotFoundException(String.format("User id=%s was not found", userId))
-        );
+        UserDto userDto = userService.getUser(userId);
         List<ItemRequestDto> listItemRequestDto = new ArrayList<>();
         Pageable pageable;
         Page<ItemRequest> page;
