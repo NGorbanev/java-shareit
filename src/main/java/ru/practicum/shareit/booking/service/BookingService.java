@@ -3,7 +3,6 @@ package ru.practicum.shareit.booking.service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.IncomingBookingDto;
 import ru.practicum.shareit.booking.dto.ShortBookingInfo;
-import ru.practicum.shareit.booking.model.Booking;
 
 import java.util.List;
 

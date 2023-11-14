@@ -8,7 +8,6 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import javax.validation.Validation;
@@ -49,8 +48,8 @@ public class BookingDtoTest {
 
         bookingDto = BookingDto.builder()
                 .id(1)
-                .start(LocalDateTime.of(2023,1,2,3,4))
-                .end(LocalDateTime.of(2024,1,2,3,4))
+                .start(LocalDateTime.of(2023, 1, 2, 3, 4))
+                .end(LocalDateTime.of(2024, 1, 2, 3, 4))
                 .item(itemDto)
                 .booker(userDto)
                 .status(BookingStatus.WAITING)
