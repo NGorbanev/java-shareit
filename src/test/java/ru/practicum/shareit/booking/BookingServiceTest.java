@@ -9,6 +9,7 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.IncomingBookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.exceptions.UnknownStateException;
 import ru.practicum.shareit.exceptions.ValidatonException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
@@ -19,6 +20,8 @@ import ru.practicum.shareit.user.service.UserService;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static java.lang.Thread.sleep;
 
 @SpringBootTest
 @Transactional
@@ -141,6 +144,38 @@ public class BookingServiceTest {
         BookingDto bookingDto = bookingService.create(incomingBookingDto, newUserDto.getId());
         Assertions.assertThrows(NotFoundException.class,
                 () -> bookingService.getBookingById(bookingDto.getId(), someone.getId()));
+    }
+
+    @Test
+    public void shouldThrowExceptionIfStatusIsIncorrect() {
+        UserDto ownerDto = userService.addUser(userDto1);
+        UserDto newUserDto = userService.addUser(userDto2);
+        ItemDto newItemDto = itemService.create(itemDto1, ownerDto.getId());
+        IncomingBookingDto incomingBookingDto = IncomingBookingDto.builder()
+                .itemId(newItemDto.getId())
+                .start(LocalDateTime.now().plusSeconds(5))
+                .end(LocalDateTime.now().plusSeconds(15))
+                .build();
+        bookingService.create(incomingBookingDto, newUserDto.getId());
+        Assertions.assertThrows(UnknownStateException.class,
+                () -> bookingService.getBookingsPageable(
+                        "SOMESTATUS", newUserDto.getId(), 0, null));
+    }
+
+    @Test
+    public void shouldThrowExceptionIfStatusIsIncorrectRequestByOwner() {
+        UserDto ownerDto = userService.addUser(userDto1);
+        UserDto newUserDto = userService.addUser(userDto2);
+        ItemDto newItemDto = itemService.create(itemDto1, ownerDto.getId());
+        IncomingBookingDto incomingBookingDto = IncomingBookingDto.builder()
+                .itemId(newItemDto.getId())
+                .start(LocalDateTime.now().plusSeconds(5))
+                .end(LocalDateTime.now().plusSeconds(15))
+                .build();
+        bookingService.create(incomingBookingDto, newUserDto.getId());
+        Assertions.assertThrows(UnknownStateException.class,
+                () -> bookingService.getBookingsOwner(
+                        "SOMESTATUS", ownerDto.getId(), 0, null));
     }
 
     @Test
@@ -396,6 +431,159 @@ public class BookingServiceTest {
         bookingService.update(testBookingDto.getId(), ownerDto.getId(), false);
         List<BookingDto> testResult = bookingService.getBookingsOwner(
                 "REJECTED", ownerDto.getId(), 0, 1);
+        Assertions.assertEquals(1, testResult.size());
+    }
+
+    @Test
+    public void getBookingInCancelledStatus() {
+        UserDto ownerDto = userService.addUser(userDto1);
+        UserDto newUserDto = userService.addUser(userDto2);
+        ItemDto newItemDto = itemService.create(itemDto1, ownerDto.getId());
+        IncomingBookingDto incomingBookingDto = IncomingBookingDto.builder()
+                .itemId(newItemDto.getId())
+                .start(LocalDateTime.now().plusSeconds(2))
+                .end(LocalDateTime.now().plusSeconds(15))
+                .build();
+        BookingDto testBookingDto = bookingService.create(incomingBookingDto, newUserDto.getId());
+        bookingService.update(testBookingDto.getId(), newUserDto.getId(), false);
+        List<BookingDto> testResult = bookingService.getBookingsPageable(
+                "CANCELLED", newUserDto.getId(), 0, 1);
+        Assertions.assertEquals(1, testResult.size());
+    }
+
+    @Test
+    public void getBookingInCancelledStatusByOwner() {
+        UserDto ownerDto = userService.addUser(userDto1);
+        UserDto newUserDto = userService.addUser(userDto2);
+        ItemDto newItemDto = itemService.create(itemDto1, ownerDto.getId());
+        IncomingBookingDto incomingBookingDto = IncomingBookingDto.builder()
+                .itemId(newItemDto.getId())
+                .start(LocalDateTime.now().plusSeconds(1))
+                .end(LocalDateTime.now().plusSeconds(15))
+                .build();
+        BookingDto testBookingDto = bookingService.create(incomingBookingDto, newUserDto.getId());
+        bookingService.update(testBookingDto.getId(), newUserDto.getId(), false);
+        List<BookingDto> testResult = bookingService.getBookingsOwner(
+                "CANCELLED", ownerDto.getId(), 0, 1);
+        Assertions.assertEquals(1, testResult.size());
+    }
+
+    @Test
+    public void getBookingInFutureStatus() {
+        UserDto ownerDto = userService.addUser(userDto1);
+        UserDto newUserDto = userService.addUser(userDto2);
+        ItemDto newItemDto = itemService.create(itemDto1, ownerDto.getId());
+        IncomingBookingDto incomingBookingDto = IncomingBookingDto.builder()
+                .itemId(newItemDto.getId())
+                .start(LocalDateTime.now().plusDays(1))
+                .end(LocalDateTime.now().plusDays(2))
+                .build();
+        BookingDto testBookingDto = bookingService.create(incomingBookingDto, newUserDto.getId());
+        bookingService.update(testBookingDto.getId(), ownerDto.getId(), true);
+        List<BookingDto> testResult = bookingService.getBookingsPageable(
+                "FUTURE", newUserDto.getId(), 0, 1);
+        Assertions.assertEquals(1, testResult.size());
+    }
+
+    @Test
+    public void getBookingInFutureStatusByOwner() {
+        UserDto ownerDto = userService.addUser(userDto1);
+        UserDto newUserDto = userService.addUser(userDto2);
+        ItemDto newItemDto = itemService.create(itemDto1, ownerDto.getId());
+        IncomingBookingDto incomingBookingDto = IncomingBookingDto.builder()
+                .itemId(newItemDto.getId())
+                .start(LocalDateTime.now().plusDays(1))
+                .end(LocalDateTime.now().plusDays(2))
+                .build();
+        BookingDto testBookingDto = bookingService.create(incomingBookingDto, newUserDto.getId());
+        List<BookingDto> testResult = bookingService.getBookingsOwner(
+                "FUTURE", ownerDto.getId(), 0, 1);
+        Assertions.assertEquals(1, testResult.size());
+    }
+
+    @Test
+    public void getBookingInPastStatus() {
+        UserDto ownerDto = userService.addUser(userDto1);
+        UserDto newUserDto = userService.addUser(userDto2);
+        ItemDto newItemDto = itemService.create(itemDto1, ownerDto.getId());
+        IncomingBookingDto incomingBookingDto = IncomingBookingDto.builder()
+                .itemId(newItemDto.getId())
+                .start(LocalDateTime.now().plusSeconds(1))
+                .end(LocalDateTime.now().plusSeconds(2))
+                .build();
+        BookingDto testBookingDto = bookingService.create(incomingBookingDto, newUserDto.getId());
+        bookingService.update(testBookingDto.getId(), ownerDto.getId(), true);
+        try {
+            sleep(3000);
+        } catch (InterruptedException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+        List<BookingDto> testResult = bookingService.getBookingsPageable(
+                "PAST", newUserDto.getId(), 0, 1);
+        Assertions.assertEquals(1, testResult.size());
+    }
+
+    @Test
+    public void getBookingInPastStatusByOwner() {
+        UserDto ownerDto = userService.addUser(userDto1);
+        UserDto newUserDto = userService.addUser(userDto2);
+        ItemDto newItemDto = itemService.create(itemDto1, ownerDto.getId());
+        IncomingBookingDto incomingBookingDto = IncomingBookingDto.builder()
+                .itemId(newItemDto.getId())
+                .start(LocalDateTime.now().plusSeconds(1))
+                .end(LocalDateTime.now().plusSeconds(2))
+                .build();
+        BookingDto testBookingDto = bookingService.create(incomingBookingDto, newUserDto.getId());
+        try {
+            sleep(3000);
+        } catch (InterruptedException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+        List<BookingDto> testResult = bookingService.getBookingsOwner(
+                "PAST", ownerDto.getId(), 0, 1);
+        Assertions.assertEquals(1, testResult.size());
+    }
+
+    @Test
+    public void getBookingInCurrentStatus() {
+        UserDto ownerDto = userService.addUser(userDto1);
+        UserDto newUserDto = userService.addUser(userDto2);
+        ItemDto newItemDto = itemService.create(itemDto1, ownerDto.getId());
+        IncomingBookingDto incomingBookingDto = IncomingBookingDto.builder()
+                .itemId(newItemDto.getId())
+                .start(LocalDateTime.now().plusSeconds(1))
+                .end(LocalDateTime.now().plusSeconds(5))
+                .build();
+        BookingDto testBookingDto = bookingService.create(incomingBookingDto, newUserDto.getId());
+        bookingService.update(testBookingDto.getId(), ownerDto.getId(), true);
+        try {
+            sleep(2000);
+        } catch (InterruptedException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+        List<BookingDto> testResult = bookingService.getBookingsPageable(
+                "CURRENT", newUserDto.getId(), 0, 1);
+        Assertions.assertEquals(1, testResult.size());
+    }
+
+    @Test
+    public void getBookingInCurrentStatusByOwner() {
+        UserDto ownerDto = userService.addUser(userDto1);
+        UserDto newUserDto = userService.addUser(userDto2);
+        ItemDto newItemDto = itemService.create(itemDto1, ownerDto.getId());
+        IncomingBookingDto incomingBookingDto = IncomingBookingDto.builder()
+                .itemId(newItemDto.getId())
+                .start(LocalDateTime.now().plusSeconds(1))
+                .end(LocalDateTime.now().plusSeconds(5))
+                .build();
+        BookingDto testBookingDto = bookingService.create(incomingBookingDto, newUserDto.getId());
+        try {
+            sleep(2000);
+        } catch (InterruptedException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+        List<BookingDto> testResult = bookingService.getBookingsOwner(
+                "CURRENT", ownerDto.getId(), 0, 1);
         Assertions.assertEquals(1, testResult.size());
     }
 }

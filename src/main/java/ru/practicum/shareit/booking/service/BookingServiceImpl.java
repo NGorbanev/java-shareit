@@ -90,17 +90,17 @@ public class BookingServiceImpl implements BookingService {
         if (booking.getStatus().equals(BookingStatus.WAITING)) {
             if (itemsValidator.ownerMatch(booking.getItem().getId(), userId)) {
                 if (approved) {
-                    log.info("Booking id={} has been approved by owner id={}", bookingId, userId);
                     booking.setStatus(BookingStatus.APPROVED);
+                    log.info("Booking id={} has been {} by owner id={}", bookingId, booking.getStatus().toString(), userId);
                 } else {
-                    log.info("Booking id={} has been rejected by owner id={}", bookingId, userId);
                     booking.setStatus(BookingStatus.REJECTED);
+                    log.info("Booking id={} has been {} by owner id={}", bookingId, booking.getStatus().toString(), userId);
                 }
                 return mapper.toBookingDto(bookingRepository.save(booking));
             } else if (booking.getBooker().getId() == userId) {
                 if (!approved) {
-                    log.info("Booking id={} has been cancelled by booker id={}", bookingId, userId);
                     booking.setStatus(BookingStatus.CANCELLED);
+                    log.info("Booking id={} has been {} by booker id={}", bookingId, booking.getStatus().toString(), userId);
                     return mapper.toBookingDto(bookingRepository.save(booking));
                 } else {
                     log.warn("Access violation for booking id={} for user id={}", bookingId, userId);
@@ -184,6 +184,9 @@ public class BookingServiceImpl implements BookingService {
             case "REJECTED":
                 page = bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.REJECTED, pageable);
                 break;
+            case "CANCELLED":
+                page = bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.CANCELLED, pageable);
+                break;
             default:
                 throw new UnknownStateException(state);
         }
@@ -246,6 +249,10 @@ public class BookingServiceImpl implements BookingService {
             case "REJECTED":
                 page = bookingRepository.findByItem_Owner_IdAndStatus(userId, BookingStatus.REJECTED, pageable);
                 log.info("State 'REJECTED' is served");
+                break;
+            case "CANCELLED":
+                page = bookingRepository.findByItem_Owner_IdAndStatus(userId, BookingStatus.CANCELLED, pageable);
+                log.info("State 'CANCELLED' is served");
                 break;
             default:
                 throw new UnknownStateException(state);

@@ -24,11 +24,11 @@ public class Booking {
     int id;
     @Column(name = "start_date")
     @NotNull
-    @FutureOrPresent
+    //@FutureOrPresent
     LocalDateTime start;
     @Column(name = "end_date")
     @NotNull
-    @Future
+    //@Future
     LocalDateTime end;
     @ManyToOne()
     @JoinColumn(name = "item_id", referencedColumnName = "id")
