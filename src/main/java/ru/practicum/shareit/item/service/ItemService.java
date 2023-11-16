@@ -14,6 +14,7 @@ public interface ItemService {
     ItemDto create(ItemDto itemDto, Integer userId);
 
     ItemDto get(int itemId, int userId);
+
     public Collection<ItemDto> getAllItemsOfUserPageable(int userId, PageRequest pageRequest);
 
     ItemDto update(int itemId, ItemDto itemDto, int userId);

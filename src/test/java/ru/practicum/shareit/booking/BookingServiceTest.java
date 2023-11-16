@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.IncomingBookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
@@ -92,7 +93,7 @@ public class BookingServiceTest {
                 .start(LocalDateTime.now().minusSeconds(1))
                 .end(LocalDateTime.now().plusSeconds(5))
                 .build();
-        Assertions.assertThrows(ValidatonException.class,
+        Assertions.assertThrows(DataIntegrityViolationException.class,
                 () -> bookingService.create(incomingBookingDto, newUserDto.getId()));
     }
 
