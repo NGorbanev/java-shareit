@@ -66,7 +66,7 @@ public class ExceptionsHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleConstraintException(final ConstraintViolationException e) {
-        log.warn("Constraint exception: " + e.getMessage());
+        log.warn("Constraint exception: {}", e.getMessage());
         return new ErrorResponse("Constraint exception " + e.getMessage());
     }
 

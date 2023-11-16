@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.storage;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
-    Page<Booking> findByBookerId(int bookerId, Pageable pageable);
+    Page<Booking> findByBookerId(int bookerId, PageRequest pageRequest);
 
     Page<Booking> findByBookerIdAndStartIsBeforeAndEndIsAfter(
             int userId, LocalDateTime start, LocalDateTime end, Pageable pageable);

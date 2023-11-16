@@ -41,9 +41,12 @@ public class ItemController {
     }
 
     @GetMapping()
-    public Collection<ItemDto> getAllItemsOfUser(@RequestHeader(USER_ID) int userId) {
+    public Collection<ItemDto> getAllItemsOfUser(
+            @RequestHeader(USER_ID) int userId,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size) {
         log.debug(String.format("GET request received. getAllItemsOfUser method used"));
-        return itemService.getAllItemsOfUser(userId);
+        return itemService.getAllItemsOfUser(userId, page, size);
     }
 
     @GetMapping("/{itemId}")
@@ -53,9 +56,12 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public Collection<ItemDto> searchForItem(@NotNull @RequestParam(name = "text") String searchQuery) {
+    public Collection<ItemDto> searchForItem(
+            @NotNull @RequestParam(name = "text") String searchQuery,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size) {
         log.debug(String.format("GET request received. Searching for '%s'", searchQuery));
-        return itemService.search(searchQuery);
+        return itemService.search(searchQuery, page, size);
     }
 
     @ResponseBody

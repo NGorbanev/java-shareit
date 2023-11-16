@@ -159,7 +159,7 @@ public class BookingServiceTest {
         bookingService.create(incomingBookingDto, newUserDto.getId());
         final UnknownStateException exception = Assertions.assertThrows(UnknownStateException.class,
                 () -> bookingService.getBookingsPageable(
-                        "SOMESTATUS", newUserDto.getId(), 0, null));
+                        "SOMESTATUS", newUserDto.getId(), 0, 10));
         Assertions.assertEquals("Unknown state: SOMESTATUS", exception.getMessage());
     }
 
@@ -176,29 +176,7 @@ public class BookingServiceTest {
         bookingService.create(incomingBookingDto, newUserDto.getId());
         Assertions.assertThrows(UnknownStateException.class,
                 () -> bookingService.getBookingsOwner(
-                        "SOMESTATUS", ownerDto.getId(), 0, null));
-    }
-
-    @Test
-    public void shouldReturnBookingsByBookerAndSizeIsNull() {
-        UserDto ownerDto = userService.addUser(userDto1);
-        UserDto newUserDto = userService.addUser(userDto2);
-        ItemDto newItemDto = itemService.create(itemDto1, ownerDto.getId());
-        IncomingBookingDto incomingBookingDto = IncomingBookingDto.builder()
-                .itemId(newItemDto.getId())
-                .start(LocalDateTime.now().plusSeconds(5))
-                .end(LocalDateTime.now().plusSeconds(15))
-                .build();
-        bookingService.create(incomingBookingDto, newUserDto.getId());
-        IncomingBookingDto incomingBookingDto1 = IncomingBookingDto.builder()
-                .itemId(newItemDto.getId())
-                .start(LocalDateTime.now().plusSeconds(6))
-                .end(LocalDateTime.now().plusSeconds(16))
-                .build();
-        bookingService.create(incomingBookingDto1, newUserDto.getId());
-        List<BookingDto> testResult = bookingService.getBookingsPageable(
-                "ALL", newUserDto.getId(), 0, null);
-        Assertions.assertEquals(2, testResult.size());
+                        "SOMESTATUS", ownerDto.getId(), 0, 10));
     }
 
     @Test
@@ -224,28 +202,6 @@ public class BookingServiceTest {
     }
 
     @Test
-    public void shouldReturnBookingsByBookerAndSizeIsNullAndStatusIsWAITING() {
-        UserDto ownerDto = userService.addUser(userDto1);
-        UserDto newUserDto = userService.addUser(userDto2);
-        ItemDto newItemDto = itemService.create(itemDto1, ownerDto.getId());
-        IncomingBookingDto incomingBookingDto = IncomingBookingDto.builder()
-                .itemId(newItemDto.getId())
-                .start(LocalDateTime.now().plusSeconds(5))
-                .end(LocalDateTime.now().plusSeconds(15))
-                .build();
-        bookingService.create(incomingBookingDto, newUserDto.getId());
-        IncomingBookingDto incomingBookingDto1 = IncomingBookingDto.builder()
-                .itemId(newItemDto.getId())
-                .start(LocalDateTime.now().plusSeconds(6))
-                .end(LocalDateTime.now().plusSeconds(16))
-                .build();
-        bookingService.create(incomingBookingDto1, newUserDto.getId());
-        List<BookingDto> testResult = bookingService.getBookingsPageable(
-                "WAITING", newUserDto.getId(), 0, null);
-        Assertions.assertEquals(2, testResult.size());
-    }
-
-    @Test
     public void shouldReturnBookingsByBookerAndSizeIsNOTNullAndStatusIsWAITING() {
         UserDto ownerDto = userService.addUser(userDto1);
         UserDto newUserDto = userService.addUser(userDto2);
@@ -268,23 +224,6 @@ public class BookingServiceTest {
     }
 
     @Test
-    public void shouldReturnBookingsByBookerAndSizeIsNullAndStatusIsREJECTED() {
-        UserDto ownerDto = userService.addUser(userDto1);
-        UserDto newUserDto = userService.addUser(userDto2);
-        ItemDto newItemDto = itemService.create(itemDto2, ownerDto.getId());
-        IncomingBookingDto incomingBookingDto = IncomingBookingDto.builder()
-                .itemId(newItemDto.getId())
-                .start(LocalDateTime.now().plusSeconds(5))
-                .end(LocalDateTime.now().plusSeconds(15))
-                .build();
-        BookingDto bookingDto = bookingService.create(incomingBookingDto, newUserDto.getId());
-        bookingService.update(bookingDto.getId(), ownerDto.getId(), false);
-        List<BookingDto> testResult = bookingService.getBookingsPageable(
-                "REJECTED", newUserDto.getId(), 0, null);
-        Assertions.assertEquals(1, testResult.size());
-    }
-
-    @Test
     public void shouldReturnBookingsByBookerAndSizeIsNOTNullAndStatusIsREJECTED() {
         UserDto ownerDto = userService.addUser(userDto1);
         UserDto newUserDto = userService.addUser(userDto2);
@@ -299,28 +238,6 @@ public class BookingServiceTest {
         List<BookingDto> testResult = bookingService.getBookingsPageable(
                 "REJECTED", newUserDto.getId(), 0, 1);
         Assertions.assertEquals(1, testResult.size());
-    }
-
-    @Test
-    public void getByOwnerAndStatusIsAllAndSizeIsNull() {
-        UserDto ownerDto = userService.addUser(userDto1);
-        UserDto newUserDto = userService.addUser(userDto2);
-        ItemDto newItemDto = itemService.create(itemDto1, ownerDto.getId());
-        IncomingBookingDto incomingBookingDto = IncomingBookingDto.builder()
-                .itemId(newItemDto.getId())
-                .start(LocalDateTime.now().plusSeconds(5))
-                .end(LocalDateTime.now().plusSeconds(15))
-                .build();
-        bookingService.create(incomingBookingDto, newUserDto.getId());
-        IncomingBookingDto incomingBookingDto1 = IncomingBookingDto.builder()
-                .itemId(newItemDto.getId())
-                .start(LocalDateTime.now().plusSeconds(6))
-                .end(LocalDateTime.now().plusSeconds(16))
-                .build();
-        bookingService.create(incomingBookingDto1, newUserDto.getId());
-        List<BookingDto> testResult = bookingService.getBookingsOwner(
-                "ALL", ownerDto.getId(), 0, null);
-        Assertions.assertEquals(2, testResult.size());
     }
 
     @Test
@@ -346,28 +263,6 @@ public class BookingServiceTest {
     }
 
     @Test
-    public void getByOwnerAndStatusIsWaitingAndSizeIsNull() {
-        UserDto ownerDto = userService.addUser(userDto1);
-        UserDto newUserDto = userService.addUser(userDto2);
-        ItemDto newItemDto = itemService.create(itemDto1, ownerDto.getId());
-        IncomingBookingDto incomingBookingDto = IncomingBookingDto.builder()
-                .itemId(newItemDto.getId())
-                .start(LocalDateTime.now().plusSeconds(5))
-                .end(LocalDateTime.now().plusSeconds(15))
-                .build();
-        bookingService.create(incomingBookingDto, newUserDto.getId());
-        IncomingBookingDto incomingBookingDto1 = IncomingBookingDto.builder()
-                .itemId(newItemDto.getId())
-                .start(LocalDateTime.now().plusSeconds(6))
-                .end(LocalDateTime.now().plusSeconds(16))
-                .build();
-        bookingService.create(incomingBookingDto1, newUserDto.getId());
-        List<BookingDto> testResult = bookingService.getBookingsOwner(
-                "WAITING", ownerDto.getId(), 0, null);
-        Assertions.assertEquals(2, testResult.size());
-    }
-
-    @Test
     public void getByOwnerAndStatusIsWaitingAndSizeIsNotNull() {
         UserDto ownerDto = userService.addUser(userDto1);
         UserDto newUserDto = userService.addUser(userDto2);
@@ -386,29 +281,6 @@ public class BookingServiceTest {
         bookingService.create(incomingBookingDto1, newUserDto.getId());
         List<BookingDto> testResult = bookingService.getBookingsOwner(
                 "WAITING", ownerDto.getId(), 0, 1);
-        Assertions.assertEquals(1, testResult.size());
-    }
-
-    @Test
-    public void getByOwnerAndStatusIsRejectedAndSizeIsNull() {
-        UserDto ownerDto = userService.addUser(userDto1);
-        UserDto newUserDto = userService.addUser(userDto2);
-        ItemDto newItemDto = itemService.create(itemDto1, ownerDto.getId());
-        IncomingBookingDto incomingBookingDto = IncomingBookingDto.builder()
-                .itemId(newItemDto.getId())
-                .start(LocalDateTime.now().plusSeconds(5))
-                .end(LocalDateTime.now().plusSeconds(15))
-                .build();
-        bookingService.create(incomingBookingDto, newUserDto.getId());
-        IncomingBookingDto incomingBookingDto1 = IncomingBookingDto.builder()
-                .itemId(newItemDto.getId())
-                .start(LocalDateTime.now().plusSeconds(6))
-                .end(LocalDateTime.now().plusSeconds(16))
-                .build();
-        BookingDto testBookingDto = bookingService.create(incomingBookingDto1, newUserDto.getId());
-        bookingService.update(testBookingDto.getId(), ownerDto.getId(), false);
-        List<BookingDto> testResult = bookingService.getBookingsOwner(
-                "REJECTED", ownerDto.getId(), 0, null);
         Assertions.assertEquals(1, testResult.size());
     }
 

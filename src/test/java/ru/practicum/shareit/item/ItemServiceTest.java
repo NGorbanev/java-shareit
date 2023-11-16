@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.IncomingBookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
@@ -22,6 +23,8 @@ import ru.practicum.shareit.user.service.UserService;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static java.lang.Thread.sleep;
@@ -63,10 +66,39 @@ public class ItemServiceTest {
     private UserDto newUserDto;
     private ItemDto newItemDto;
 
+
+    private List<ItemDto> itemDtoGenerator(int amount) {
+        List<ItemDto> result = new ArrayList<>();
+        for (int i = 1; i < amount; i++) {
+            result.add(ItemDto.builder()
+                    .id(i)
+                    .name("Item" + i + " name")
+                    .description("Item " + i + "description")
+                    .available(true)
+                    .build());
+        }
+        return result;
+    }
+
     @BeforeEach
     public void beforeEach() {
         newUserDto = userService.addUser(userDto1);
         newItemDto = itemService.create(itemDto1, newUserDto.getId());
+
+    }
+
+    @Test
+    public void getPageableItemsTest() {
+        UserDto userDto = userService.addUser(UserDto.builder()
+                .name("Ivan")
+                .email("ya@van.ya")
+                .build());
+        for (ItemDto newItem: itemDtoGenerator(300)) {
+            itemService.create(newItem, userDto.getId());
+        }
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        Assertions.assertEquals(10,
+                itemService.getAllItemsOfUserPageable(userDto.getId(), pageRequest).size());
     }
 
     @Test
@@ -83,7 +115,6 @@ public class ItemServiceTest {
 
     @Test
     public void shouldThrowExceptionWhenUpdatingItemNotByOwner() {
-        //UserDto userDto = userService.addUser(userDto2);
         UserDto userDto = userService.addUser(UserDto.builder()
                 .name("Oleg")
                 .email("oleg@petrovich.org")
@@ -103,14 +134,14 @@ public class ItemServiceTest {
     public void getAllItemsTest() {
         itemService.create(itemDto1, newUserDto.getId());
         itemService.create(itemDto2, newUserDto.getId());
-        Assertions.assertEquals(itemService.getAllItems().size(), 3);
+        Assertions.assertEquals(itemService.getAllItemsOfUser(newUserDto.getId(), 0, 10).size(), 3);
     }
 
     @Test
     public void getAllItemsOfOwnerTest() {
         itemService.create(itemDto1, newUserDto.getId());
         itemService.create(itemDto2, newUserDto.getId());
-        Assertions.assertEquals(itemService.getAllItemsOfUser(newUserDto.getId()).size(), 3);
+        Assertions.assertEquals(itemService.getAllItemsOfUser(newUserDto.getId(), 0, 10).size(), 3);
     }
 
     @Test
@@ -118,8 +149,7 @@ public class ItemServiceTest {
         itemDto2.setName("String for search");
         itemDto2.setId(0);
         itemService.create(itemDto2, newUserDto.getId());
-        Assertions.assertEquals(1, itemService.search("String for search").size());
-        Assertions.assertEquals(2, itemService.getAllItems().size(), "Should be 2 items at base");
+        Assertions.assertEquals(1, itemService.search("String for search", 0, 10).size());
     }
 
     @Test

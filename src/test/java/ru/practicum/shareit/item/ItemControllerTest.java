@@ -26,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
@@ -105,7 +104,7 @@ public class ItemControllerTest {
 
     @Test
     public void getItemsOfOwner() throws Exception {
-        when(itemService.getAllItemsOfUser(any(int.class))).thenReturn(List.of(itemDto));
+        when(itemService.getAllItemsOfUser(any(int.class), any(int.class), any(int.class))).thenReturn(List.of(itemDto));
         mvc.perform(get("/items")
                         .content(mapper.writeValueAsString(itemsDtoList))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -127,7 +126,7 @@ public class ItemControllerTest {
 
     @Test
     public void searchItemsTest() throws Exception {
-        when(itemService.search(any(String.class))).thenReturn(List.of(itemDto));
+        when(itemService.search(any(String.class), any(int.class), any(int.class))).thenReturn(List.of(itemDto));
         mvc.perform(get("/items/search?text=Богатырский")
                         .content(mapper.writeValueAsString(itemsDtoList))
                         .characterEncoding(StandardCharsets.UTF_8)

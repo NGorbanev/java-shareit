@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request.storage;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -13,5 +14,5 @@ public interface ItemRequestRepository extends PagingAndSortingRepository<ItemRe
 
     Page<ItemRequest> findAllByRequesterIdNot(int userId, Pageable pageable);
 
-    List<ItemRequest> findAllByRequesterIdNotOrderByCreatedDesc(int userId);
+    Page<ItemRequest> findAllByRequesterIdNotOrderByCreatedDesc(int userId, PageRequest pageRequest);
 }

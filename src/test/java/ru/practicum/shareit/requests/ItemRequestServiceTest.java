@@ -58,20 +58,6 @@ public class ItemRequestServiceTest {
     }
 
     @Test
-    public void getAllItemRequestsWithSizeNotNullAndNull() {
-        UserDto userDto1 = userService.addUser(this.userDto1);
-        UserDto userDto2 = userService.addUser(this.userDto2);
-        itemRequestService.create(itemRequestDto, userDto2.getId(),
-                LocalDateTime.of(2023, 1, 2, 3, 4, 5));
-        itemRequestService.create(itemRequestDto, userDto2.getId(),
-                LocalDateTime.of(2024, 1, 2, 3, 4, 5));
-        Assertions.assertEquals(2, itemRequestService.getAllItemRequests(userDto1.getId(),
-                0, 3).size());
-        Assertions.assertEquals(2, itemRequestService.getAllItemRequests(userDto1.getId(),
-                0, null).size());
-    }
-
-    @Test
     public void getOwnItemRequests() {
         UserDto userDto2 = userService.addUser(this.userDto2);
         itemRequestService.create(itemRequestDto, userDto2.getId(),

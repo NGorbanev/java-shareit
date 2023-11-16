@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -19,11 +18,9 @@ import ru.practicum.shareit.exceptions.UnknownStateException;
 import ru.practicum.shareit.exceptions.ValidatonException;
 import ru.practicum.shareit.item.utils.ItemsValidator;
 import ru.practicum.shareit.user.utils.UserValidator;
-import ru.practicum.shareit.utils.Pagination;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -58,10 +55,8 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidatonException(
                     String.format("Item id=%s is not available for booking", incomingBookingDto.getItemId()));
         }
-        if (incomingBookingDto.getStart().isBefore(LocalDateTime.now()) || (
-                incomingBookingDto.getEnd().equals(incomingBookingDto.getStart()) ||
-                        incomingBookingDto.getEnd().isBefore(incomingBookingDto.getStart())
-        )) {
+
+        if (!incomingBookingDto.getEnd().isAfter(incomingBookingDto.getStart())) {
             log.warn("Wrong start or end date");
             throw new ValidatonException("Wrong start or end date");
         }
@@ -133,59 +128,49 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getBookingsPageable(String state, int userId, Integer from, Integer size) {
+    public List<BookingDto> getBookingsPageable(String state, int userId, int page, int size) {
         log.info("getBookings with pagination request received");
         userValidator.validateUserById(userId);
-        List<BookingDto> result = new ArrayList<>();
-        Pageable pageable;
         Sort sort = Sort.by(Sort.Direction.DESC, "start");
-        Page<Booking> page;
-        Pagination pages = new Pagination(from, size);
-        if (size == null) {
-            pageable = PageRequest.of(pages.getIndex(), pages.getPageSize(), sort);
-            do {
-                page = getPageForBookings(state, userId, pageable);
-                result.addAll(page.stream().map(mapper::toBookingDto).collect(toList()));
-                pageable = pageable.next();
-            } while (page.hasNext());
-        } else {
-            for (int i = pages.getIndex(); i < pages.getTotalPages(); i++) {
-                pageable = PageRequest.of(i, pages.getPageSize(), sort);
-                page = getPageForBookings(state, userId, pageable);
-                result.addAll(page.stream().map(mapper::toBookingDto).collect(toList()));
-                if (!page.hasNext()) {
-                    break;
-                }
-            }
-            result = result.stream().limit(size).collect(toList());
-        }
-        return result;
+        PageRequest pageRequest = PageRequest.of(page / size, size, sort);
+        return getPageForBookings(state, userId, pageRequest)
+                .getContent()
+                .stream()
+                .map(mapper::toBookingDto)
+                .collect(toList());
     }
 
-    private Page<Booking> getPageForBookings(String state, int userId, Pageable pageable) {
+    private Page<Booking> getPageForBookings(String state, int userId, PageRequest pageRequest) {
         Page<Booking> page;
         switch (state) {
             case "ALL":
-                page = bookingRepository.findByBookerId(userId, pageable);
+                page = bookingRepository.findByBookerId(userId, pageRequest);
+                log.info("Result is {} bookings", page.getSize());
                 break;
             case "CURRENT":
                 page = bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfter(userId, LocalDateTime.now(),
-                        LocalDateTime.now(), pageable);
+                        LocalDateTime.now(), pageRequest);
+                log.info("Result is {} bookings", page.getSize());
                 break;
             case "PAST":
-                page = bookingRepository.findByBookerIdAndEndIsBefore(userId, LocalDateTime.now(), pageable);
+                page = bookingRepository.findByBookerIdAndEndIsBefore(userId, LocalDateTime.now(), pageRequest);
+                log.info("Result is {} bookings", page.getSize());
                 break;
             case "FUTURE":
-                page = bookingRepository.findByBookerIdAndStartIsAfter(userId, LocalDateTime.now(), pageable);
+                page = bookingRepository.findByBookerIdAndStartIsAfter(userId, LocalDateTime.now(), pageRequest);
+                log.info("Result is {} bookings", page.getSize());
                 break;
             case "WAITING":
-                page = bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.WAITING, pageable);
+                page = bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.WAITING, pageRequest);
+                log.info("Result is {} bookings", page.getSize());
                 break;
             case "REJECTED":
-                page = bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.REJECTED, pageable);
+                page = bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.REJECTED, pageRequest);
+                log.info("Result is {} bookings", page.getSize());
                 break;
             case "CANCELLED":
-                page = bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.CANCELLED, pageable);
+                page = bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.CANCELLED, pageRequest);
+                log.info("Result is {} bookings", page.getSize());
                 break;
             default:
                 throw new UnknownStateException(state);
@@ -196,62 +181,45 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> getBookingsOwner(String state, int userId, Integer from, Integer size) {
         log.info("getBookingsOwner request received");
         userValidator.validateUserById(userId);
-        List<BookingDto> result = new ArrayList<>();
-        Pageable pageable;
         Sort sort = Sort.by(Sort.Direction.DESC, "start");
-        Page<Booking> page;
-        Pagination pages = new Pagination(from, size);
-        if (size == null) {
-            pageable = PageRequest.of(pages.getIndex(), pages.getPageSize(), sort);
-            do {
-                page = getPageBookingsOwner(state, userId, pageable);
-                result.addAll(page.stream().map(mapper::toBookingDto).collect(toList()));
-                pageable = pageable.next();
-            } while (page.hasNext());
-        } else {
-            for (int i = pages.getIndex(); i < pages.getTotalPages(); i++) {
-                pageable = PageRequest.of(i, pages.getPageSize(), sort);
-                page = getPageBookingsOwner(state, userId, pageable);
-                result.addAll(page.stream().map(mapper::toBookingDto).collect(toList()));
-                if (!page.hasNext()) {
-                    break;
-                }
-            }
-            result = result.stream().limit(size).collect(toList());
-        }
-        return result;
+        PageRequest pageRequest = PageRequest.of(from, size, sort);
+        return getPageBookingsOwner(state, userId, pageRequest)
+                .getContent()
+                .stream()
+                .map(mapper::toBookingDto)
+                .collect(toList());
     }
 
-    private Page<Booking> getPageBookingsOwner(String state, int userId, Pageable pageable) {
+    private Page<Booking> getPageBookingsOwner(String state, int userId, PageRequest pageRequest) {
         Page<Booking> page;
         switch (state) {
             case "ALL":
-                page = bookingRepository.findByItem_Owner_Id(userId, pageable);
+                page = bookingRepository.findByItem_Owner_Id(userId, pageRequest);
                 log.info("State 'ALL' is served");
                 break;
             case "CURRENT":
                 page = bookingRepository.findByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(
-                        userId, LocalDateTime.now(), LocalDateTime.now(), pageable);
+                        userId, LocalDateTime.now(), LocalDateTime.now(), pageRequest);
                 log.info("State 'CURRENT' is served");
                 break;
             case "PAST":
-                page = bookingRepository.findByItem_Owner_IdAndEndIsBefore(userId, LocalDateTime.now(), pageable);
+                page = bookingRepository.findByItem_Owner_IdAndEndIsBefore(userId, LocalDateTime.now(), pageRequest);
                 log.info("State 'PAST' is served");
                 break;
             case "FUTURE":
-                page = bookingRepository.findByItem_Owner_IdAndStartIsAfter(userId, LocalDateTime.now(), pageable);
+                page = bookingRepository.findByItem_Owner_IdAndStartIsAfter(userId, LocalDateTime.now(), pageRequest);
                 log.info("State 'FUTURE' is served");
                 break;
             case "WAITING":
-                page = bookingRepository.findByItem_Owner_IdAndStatus(userId, BookingStatus.WAITING, pageable);
+                page = bookingRepository.findByItem_Owner_IdAndStatus(userId, BookingStatus.WAITING, pageRequest);
                 log.info("State 'WAITING' is served");
                 break;
             case "REJECTED":
-                page = bookingRepository.findByItem_Owner_IdAndStatus(userId, BookingStatus.REJECTED, pageable);
+                page = bookingRepository.findByItem_Owner_IdAndStatus(userId, BookingStatus.REJECTED, pageRequest);
                 log.info("State 'REJECTED' is served");
                 break;
             case "CANCELLED":
-                page = bookingRepository.findByItem_Owner_IdAndStatus(userId, BookingStatus.CANCELLED, pageable);
+                page = bookingRepository.findByItem_Owner_IdAndStatus(userId, BookingStatus.CANCELLED, pageRequest);
                 log.info("State 'CANCELLED' is served");
                 break;
             default:

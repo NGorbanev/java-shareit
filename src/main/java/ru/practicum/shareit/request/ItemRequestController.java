@@ -7,6 +7,7 @@ import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -46,7 +47,7 @@ public class ItemRequestController {
     @GetMapping("/all")
     public List<ItemRequestDto> getAllItemRequests(@RequestHeader(USER_ID) int userId,
                                                    @RequestParam(defaultValue = "0") Integer from,
-                                                   @RequestParam(required = false) Integer size) {
+                                                   @RequestParam(defaultValue = "10") @Positive Integer size) {
         log.info("GET request for getting all ItemRequests received from userId={}", userId);
         return service.getAllItemRequests(userId, from, size);
     }

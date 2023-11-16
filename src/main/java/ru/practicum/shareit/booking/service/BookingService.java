@@ -13,7 +13,7 @@ public interface BookingService {
 
     BookingDto getBookingById(int bookingId, int userId);
 
-    List<BookingDto> getBookingsPageable(String state, int userId, Integer from, Integer size);
+    List<BookingDto> getBookingsPageable(String state, int userId, int from, int size);
 
     List<BookingDto> getBookingsOwner(String state, int userId, Integer from, Integer size);
 

@@ -5,8 +5,11 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.IncomingBookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exceptions.ValidatonException;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 
 @RestController
@@ -42,8 +45,12 @@ public class BookingController {
     @GetMapping
     public Collection<BookingDto> getBookings(@RequestParam(name = "state", defaultValue = "ALL") String state,
                                               @RequestHeader(USER_ID) int userId,
-                                              @RequestParam(defaultValue = "0") Integer from,
-                                              @RequestParam(required = false) Integer size) {
+                                              @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                              @RequestParam(required = false, defaultValue = "10") @Positive Integer size) {
+        //I got no idea why @PositiveOrZero check doesnot work correctly. So i had to add manual check..
+        if (from < 0) {
+            throw new ValidatonException("From value is less than zero");
+        }
         return service.getBookingsPageable(state, userId, from, size);
     }
 
@@ -51,8 +58,8 @@ public class BookingController {
     @GetMapping("/owner")
     public Collection<BookingDto> getBookingsOwner(@RequestParam(name = "state", defaultValue = "ALL") String state,
                                                    @RequestHeader(USER_ID) int userId,
-                                                   @RequestParam(defaultValue = "0") Integer from,
-                                                   @RequestParam(required = false) Integer size) {
+                                                   @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                                   @RequestParam(required = false, defaultValue = "10") Integer size) {
         return service.getBookingsOwner(state, userId, from, size);
     }
 }

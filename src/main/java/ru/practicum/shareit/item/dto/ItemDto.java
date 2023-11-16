@@ -21,7 +21,8 @@ public class ItemDto {
     @NotNull(message = "Item.description is null")
     @NotBlank(message = "Item description must no be empty")
     String description;
-    @NotNull(message = "Item.available is null") Boolean available;
+    @NotNull(message = "Item.available is null")
+    Boolean available;
     int requestId;
     private ShortBookingInfo lastBooking;
     private ShortBookingInfo nextBooking;
