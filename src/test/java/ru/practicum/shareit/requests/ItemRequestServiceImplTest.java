@@ -7,6 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.exceptions.ItemRequestNotFound;
+import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.item.utils.ItemMapper;
 import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.request.service.ItemRequestServiceImpl;
 import ru.practicum.shareit.request.storage.ItemRequestRepository;
@@ -27,10 +29,14 @@ public class ItemRequestServiceImplTest {
     private ItemRequestRepository mockItemRequestRepository;
     private ItemRequestService itemRequestService;
     private ItemRequestMapper itemRequestMapper;
+    private ItemMapper itemMapper;
 
 
     @Mock
     private UserRepository mocUserRepository;
+
+    @Mock
+    private ItemRepository mocItemRepository;
 
     private UserDto userDto = UserDto.builder()
             .name("User")
@@ -44,7 +50,11 @@ public class ItemRequestServiceImplTest {
 
     @Test
     public void throwExceptionWhenItemRequestIsWithWrongId() {
-        itemRequestService = new ItemRequestServiceImpl(mockItemRequestRepository, itemRequestMapper, mocUserRepository);
+        itemRequestService = new ItemRequestServiceImpl(
+                mockItemRequestRepository,
+                mocUserRepository,
+                mocItemRepository,
+                itemMapper);
         when(mockItemRequestRepository.findById(any(int.class))).thenReturn(Optional.empty());
         when(mocUserRepository.findById(any(int.class))).thenReturn(Optional.of(user));
         Assertions.assertThrows(ItemRequestNotFound.class,

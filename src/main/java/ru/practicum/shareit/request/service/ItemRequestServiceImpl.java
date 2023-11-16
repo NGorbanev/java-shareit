@@ -8,6 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.ItemRequestNotFound;
 import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.item.utils.ItemMapper;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.storage.ItemRequestRepository;
@@ -15,6 +19,7 @@ import ru.practicum.shareit.request.utils.ItemRequestMapper;
 import ru.practicum.shareit.user.storage.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,24 +31,36 @@ import static java.util.stream.Collectors.toList;
 public class ItemRequestServiceImpl implements ItemRequestService {
 
     private final ItemRequestRepository repository;
-    private final ItemRequestMapper itemRequestMapper;
+    private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final ItemMapper itemMapper;
 
     @Autowired
     public ItemRequestServiceImpl(ItemRequestRepository repository,
-                                  ItemRequestMapper itemRequestMapper,
-                                  UserRepository userRepository) {
+                                  UserRepository userRepository,
+                                  ItemRepository itemRepository,
+                                  ItemMapper itemMapper) {
         this.repository = repository;
-        this.itemRequestMapper = itemRequestMapper;
         this.userRepository = userRepository;
+        this.itemRepository = itemRepository;
+        this.itemMapper = itemMapper;
 
     }
 
     @Override
     public ItemRequestDto create(ItemRequestDto itemRequestDto, int requesterId, LocalDateTime created) {
         log.info("Create request for ItemRequest received");
-        ItemRequest itemRequest = itemRequestMapper.toItemRequest(itemRequestDto, requesterId, created);
-        return itemRequestMapper.toItemRequestDto(repository.save(itemRequest));
+        ItemRequest itemRequest = ItemRequestMapper.toItemRequest(
+                itemRequestDto,
+                userRepository.findById(requesterId).orElseThrow(
+                        () -> new NotFoundException(String.format("User id=%s not found", requesterId))),
+                created);
+        ItemRequest savedItemRequest = repository.save(itemRequest);
+        List<ItemDto> itemDtosOfRequest = itemRepository.findAllByRequestId(savedItemRequest.getId(), Sort.unsorted())
+                .stream()
+                .map(itemMapper::toItemDto)
+                .collect(toList());
+        return ItemRequestMapper.toItemRequestDto(savedItemRequest, itemDtosOfRequest);
     }
 
 
@@ -55,26 +72,50 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 () -> new NotFoundException(String.format("User id=%s not found", userId))));
         ItemRequest itemRequest = repository.findById(itemRequestId).orElseThrow(
                 () -> new ItemRequestNotFound(String.format("Item request id=%s not found", itemRequestId)));
-        return itemRequestMapper.toItemRequestDto(itemRequest);
+        List<ItemDto> itemDtosOfRequest = itemRepository.findAllByRequestId(itemRequest.getId(), Sort.unsorted())
+                .stream()
+                .map(itemMapper::toItemDto)
+                .collect(toList());
+        return ItemRequestMapper.toItemRequestDto(itemRequest, itemDtosOfRequest);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ItemRequestDto> getOwnItemRequests(int requesterId) {
         log.info("Get Own Item Requests received");
+        log.debug("Check if user exists");
         Optional.of(userRepository.findById(requesterId).orElseThrow(
                 () -> new NotFoundException(String.format("User id=%s not found", requesterId))));
-        return repository.findAllByRequesterId(requesterId, Sort.by(Sort.Direction.DESC, "created")).stream()
-                .map(itemRequestMapper::toItemRequestDto)
-                .collect(toList());
+        log.debug("User check ok. Getting itemRequestList from itemRequestRepository");
+        List<ItemRequest> itemRequestList = repository.findAllByRequesterId(requesterId, Sort.by(Sort.Direction.DESC,
+                "created"));
+        return getItemDtosForRequest(itemRequestList);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ItemRequestDto> getAllItemRequests(int userId, Integer from, Integer size) {
         PageRequest pageRequest = PageRequest.of(from, size);
-        List<ItemRequestDto> requests = repository.findAllByRequesterIdNotOrderByCreatedDesc(userId, pageRequest)
-                .stream().map(itemRequestMapper::toItemRequestDto).collect(toList());
-        return requests;
+        List<ItemRequest> requests = repository.findAllByRequesterIdNotOrderByCreatedDesc(userId, pageRequest).getContent();
+        return getItemDtosForRequest(requests);
+    }
+
+    private List<ItemRequestDto> getItemDtosForRequest(List<ItemRequest> itemRequestList) {
+        log.debug("Getting itemsOfRequestsList");
+        List<Item> itemsOfRequestsList = itemRepository.findAllByRequestIdIn(
+                itemRequestList.stream().map(ItemRequest::getId).collect(toList()));
+        List<ItemDto> itemDtosOfCurrentRequest = new ArrayList<>();
+        List<ItemRequestDto> result = new ArrayList<>();
+        log.debug("itemRequestList got {} records", itemRequestList.size());
+        log.debug("itemsOfRequestsList got {} records", itemsOfRequestsList.size());
+        for (ItemRequest ir : itemRequestList) {
+            for (Item i : itemsOfRequestsList) {
+                if (i.getRequestId() == ir.getId()) {
+                    itemDtosOfCurrentRequest.add(itemMapper.toItemDto(i));
+                }
+            }
+            result.add(ItemRequestMapper.toItemRequestDto(ir, itemDtosOfCurrentRequest));
+        }
+        return result;
     }
 }

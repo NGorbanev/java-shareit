@@ -1,41 +1,35 @@
 package ru.practicum.shareit.request.utils;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import ru.practicum.shareit.item.service.ItemService;
+import lombok.experimental.UtilityClass;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.utils.UserMapper;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-@Component
+
+@UtilityClass
 public class ItemRequestMapper {
-    private final UserService userService;
-    private final ItemService itemService;
 
-    @Autowired
-    public ItemRequestMapper(UserService userService, ItemService itemService) {
-        this.userService = userService;
-        this.itemService = itemService;
-    }
-
-    public ItemRequest toItemRequest(ItemRequestDto itemRequestDto, int requesterId, LocalDateTime created) {
+    public ItemRequest toItemRequest(ItemRequestDto itemRequestDto, User user, LocalDateTime created) {
         return ItemRequest.builder()
                 .description(itemRequestDto.getDescription())
-                .requester(UserMapper.toUser(userService.getUser(requesterId)))
+                .requester(user)
                 .created(created)
                 .build();
     }
 
-    public ItemRequestDto toItemRequestDto(ItemRequest itemRequest) {
+    public ItemRequestDto toItemRequestDto(ItemRequest itemRequest, List<ItemDto> items) {
         return ItemRequestDto.builder()
                 .id(itemRequest.getId())
                 .description(itemRequest.getDescription())
                 .requester(UserMapper.toUserDto(itemRequest.getRequester()))
                 .created(itemRequest.getCreated())
-                .items(itemService.getItemsByRequestId(itemRequest.getId()))
+                .items(items)
                 .build();
+
     }
 }

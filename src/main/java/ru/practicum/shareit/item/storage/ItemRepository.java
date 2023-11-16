@@ -22,4 +22,7 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
     List<Item> getItemsBySearchQuery(@Param("search") String text, PageRequest pageRequest);
 
     List<Item> findAllByRequestId(int requestId, Sort sort);
+
+    List<Item> findAllByRequestIdIn(@Param("ids") List<Integer> ids);
+
 }
