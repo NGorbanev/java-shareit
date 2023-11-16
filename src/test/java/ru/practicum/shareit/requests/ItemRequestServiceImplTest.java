@@ -13,7 +13,6 @@ import ru.practicum.shareit.request.storage.ItemRequestRepository;
 import ru.practicum.shareit.request.utils.ItemRequestMapper;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserRepository;
 
 import java.util.Optional;
@@ -47,7 +46,6 @@ public class ItemRequestServiceImplTest {
     public void throwExceptionWhenItemRequestIsWithWrongId() {
         itemRequestService = new ItemRequestServiceImpl(mockItemRequestRepository, itemRequestMapper, mocUserRepository);
         when(mockItemRequestRepository.findById(any(int.class))).thenReturn(Optional.empty());
-        //when(mocUserService.getUser(any(int.class))).thenReturn(userDto);
         when(mocUserRepository.findById(any(int.class))).thenReturn(Optional.of(user));
         Assertions.assertThrows(ItemRequestNotFound.class,
                 () -> itemRequestService.getItemRequestById(-1, -1));
