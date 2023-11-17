@@ -21,7 +21,9 @@ import ru.practicum.shareit.user.storage.UserRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -103,16 +105,19 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private List<ItemRequestDto> getItemDtosForRequest(List<ItemRequest> itemRequestList) {
         log.debug("Getting itemsOfRequestsList");
         List<Item> itemsOfRequestsList = itemRepository.findAllByRequestIdIn(
-                itemRequestList.stream().map(ItemRequest::getId).collect(toList()));
-        List<ItemDto> itemDtosOfCurrentRequest = new ArrayList<>();
-        List<ItemRequestDto> result = new ArrayList<>();
+                itemRequestList.stream().map(ItemRequest::getId).collect(toList())); // get all items for all requests
+        List<ItemDto> itemDtosOfCurrentRequest = new ArrayList<>(); // will be used for items to request mapping
+        List<ItemRequestDto> result = new ArrayList<>(); // will contain the final requests list
+        Map<Integer, List<Item>> itemsOfRequestMap = itemsOfRequestsList.stream()
+                .collect(Collectors.groupingBy(Item::getRequestId));
         log.debug("itemRequestList got {} records", itemRequestList.size());
         log.debug("itemsOfRequestsList got {} records", itemsOfRequestsList.size());
         for (ItemRequest ir : itemRequestList) {
-            for (Item i : itemsOfRequestsList) {
-                if (i.getRequestId() == ir.getId()) {
-                    itemDtosOfCurrentRequest.add(itemMapper.toItemDto(i));
-                }
+            if (itemsOfRequestMap.containsKey(ir.getId())) {
+                itemDtosOfCurrentRequest.addAll(itemsOfRequestMap.get(ir.getId())
+                        .stream()
+                        .map(itemMapper::toItemDto)
+                        .collect(Collectors.toList()));
             }
             result.add(ItemRequestMapper.toItemRequestDto(ir, itemDtosOfCurrentRequest));
         }

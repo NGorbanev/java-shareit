@@ -128,11 +128,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getBookingsPageable(String state, int userId, int page, int size) {
+    public List<BookingDto> getBookingsPageable(String state, int userId, int from, int size) {
         log.info("getBookings with pagination request received");
+        log.debug("Parameters: state={}, userId={}, from={}, size={}", state, userId, from, size);
         userValidator.validateUserById(userId);
         Sort sort = Sort.by(Sort.Direction.DESC, "start");
-        PageRequest pageRequest = PageRequest.of(page / size, size, sort);
+        PageRequest pageRequest = PageRequest.of(from / size, size, sort);
+        log.debug("PageRequest created: {}", pageRequest.toString());
         return getPageForBookings(state, userId, pageRequest)
                 .getContent()
                 .stream()

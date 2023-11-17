@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -13,6 +14,7 @@ import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 
 @RestController
+@Slf4j
 @RequestMapping(path = "/bookings")
 public class BookingController {
     private static final String USER_ID = "X-Sharer-User-Id";
@@ -45,12 +47,14 @@ public class BookingController {
     @GetMapping
     public Collection<BookingDto> getBookings(@RequestParam(name = "state", defaultValue = "ALL") String state,
                                               @RequestHeader(USER_ID) int userId,
-                                              @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-                                              @RequestParam(required = false, defaultValue = "10") @Positive Integer size) {
+                                              @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                              @RequestParam(required = false, defaultValue = "10") @Positive int size) {
         //I got no idea why @PositiveOrZero check doesnot work correctly. So i had to add manual check..
         if (from < 0) {
             throw new ValidatonException("From value is less than zero");
         }
+        log.debug("GetBookings request received");
+        log.debug("Parameters: state={}, userId={}, from={}, size={}", state, userId, from, size);
         return service.getBookingsPageable(state, userId, from, size);
     }
 
@@ -58,8 +62,8 @@ public class BookingController {
     @GetMapping("/owner")
     public Collection<BookingDto> getBookingsOwner(@RequestParam(name = "state", defaultValue = "ALL") String state,
                                                    @RequestHeader(USER_ID) int userId,
-                                                   @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-                                                   @RequestParam(required = false, defaultValue = "10") Integer size) {
+                                                   @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                                   @RequestParam(defaultValue = "10") int size) {
         return service.getBookingsOwner(state, userId, from, size);
     }
 }
