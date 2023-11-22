@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
@@ -25,7 +27,8 @@ import ru.practicum.shareit.user.utils.UserMapper;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @Slf4j
@@ -56,22 +59,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> getAllItems() {
+    public Collection<ItemDto> getAllItemsOfUser(int userId, int page, int size) {
         log.info("getAllItems servicing...");
-        Collection<ItemDto> result = new ArrayList<>();
-        for (Item i : itemStorage.findAll()) {
-            result.add(itemMapper.toItemDto(i));
-        }
-        log.info("getAllItems is serviced");
-        return result;
-    }
-
-    @Override
-    public Collection<ItemDto> getAllItemsOfUser(int userId) {
-        log.info("getAllItemsOfUser servicing...");
-        List<Item> items = itemStorage.findAll().stream()
-                .filter(itemDto -> itemDto.getOwner().getId() == userId)
-                .collect(Collectors.toList());
+        PageRequest pageRequest = PageRequest.of(page, size);
+        log.info("getAllItemsOfUserPageable servicing... ");
+        Page<Item> items = itemStorage.findByOwnerId(userId, pageRequest);
+        log.info("Request returned {} items", items.getSize());
+        List<Item> itemsList = items.getContent();
         ArrayList<ItemDto> result = new ArrayList<>();
         for (Item i : items) {
             result.add(itemMapper.itemDtoExtended(i));
@@ -79,6 +73,15 @@ public class ItemServiceImpl implements ItemService {
         log.info("getAllItemsOfUser is serviced");
         return result;
     }
+
+    @Override
+    public Collection<ItemDto> getAllItemsOfUserPageable(int userId, PageRequest pageRequest) {
+        log.info("getAllItemsOfUserPageable servicing... ");
+        Page<Item> items = itemStorage.findByOwnerId(userId, pageRequest);
+        log.info("Request returned {} items", items.getSize());
+        return items.stream().map(itemMapper::toItemDto).collect(toList());
+    }
+
 
     @Override
     public ItemDto create(ItemDto itemDto, Integer userId) {
@@ -113,7 +116,6 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto update(int itemId, ItemDto itemTransferName, int user) {
         log.info("Update request for itemId={} by userId={} servicing", itemId, user);
         if (!validator.ownerMatch(itemId, user)) {
-            log.info("Item id={} found", itemId);
             throw new NotAllowedException(itemTransferName, user);
         }
         Optional<Item> item = itemStorage.findById(itemId);
@@ -144,7 +146,7 @@ public class ItemServiceImpl implements ItemService {
             log.info("ItemId={} is updating..", itemId);
             return itemMapper.toItemDto(itemStorage.save(itemForUpdate));
         } else {
-            throw new NotFoundException(itemTransferName);
+            throw new NotFoundException(String.format("Object not found: %s", itemTransferName));
         }
     }
 
@@ -162,18 +164,17 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> search(String text) {
+    public Collection<ItemDto> search(String text, int page, int size) {
         log.info("Search request for string '{}' is servicing..", text);
+        PageRequest pageRequest = PageRequest.of(page, size);
         if (text.isEmpty()) {
             log.warn("Text is empty. Nothing to search");
             return Collections.emptyList();
         }
         log.info("Getting search results");
-        return getAllItems().stream()
-                .filter(item -> item.getAvailable() &&
-                        (item.getName().toUpperCase().contains(text.toUpperCase()) ||
-                                item.getDescription().toUpperCase().contains(text.toUpperCase())))
-                .collect(Collectors.toList());
+        List<ItemDto> result = itemStorage.getItemsBySearchQuery(text.toUpperCase(), pageRequest).stream()
+                .map(itemMapper::toItemDto).collect(toList());
+        return result;
     }
 
     @Override
@@ -204,7 +205,7 @@ public class ItemServiceImpl implements ItemService {
         commentDtos = commentsRepository.findAllByItem_Id(itemId,
                         Sort.by(Sort.Direction.DESC, "created")).stream()
                 .map(CommentMapper::toCommentDto)
-                .collect(Collectors.toList());
+                .collect(toList());
         if (commentDtos == null) {
             log.info("No comments found for item={}", itemId);
             return new ArrayList<>();
@@ -213,4 +214,11 @@ public class ItemServiceImpl implements ItemService {
         return commentDtos;
     }
 
+    @Override
+    public List<ItemDto> getItemsByRequestId(int requestId) {
+        return itemStorage.findAllByRequestId(requestId,
+                        Sort.by(Sort.Direction.DESC, "id")).stream()
+                .map(itemMapper::toItemDto)
+                .collect(toList());
+    }
 }

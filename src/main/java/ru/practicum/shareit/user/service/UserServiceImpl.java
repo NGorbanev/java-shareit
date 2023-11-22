@@ -44,7 +44,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto getUser(int id) {
         log.info("getUserId={} is servicing", id);
-        UserDto userDto = UserMapper.toUserDto(userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found")));
+        UserDto userDto = UserMapper.toUserDto(userRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("User not found")));
         log.info("userId={} will be returned", id);
         return userDto;
     }
@@ -56,7 +57,7 @@ public class UserServiceImpl implements UserService {
             log.info("addUser performed");
             return UserMapper.toUserDto(userRepository.save(UserMapper.toUser(userDto)));
         } catch (DataIntegrityViolationException e) {
-            log.warn("User with email '{}' is already registred", userDto.getEmail());
+            log.warn("User with email '{}' is already registered", userDto.getEmail());
             throw new ConflictException("Email is already registered");
         }
     }
@@ -75,7 +76,6 @@ public class UserServiceImpl implements UserService {
         }
         User updatedUser = UserMapper.toUser(userDto);
         updatedUser.setId(id);
-        log.info("User id={} will be updated", id);
         return UserMapper.toUserDto(userRepository.save(updatedUser));
     }
 
