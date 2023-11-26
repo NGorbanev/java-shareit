@@ -19,7 +19,7 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ErrorResponse handleConnectionException(ConnectException e) {
         log.warn("Server is unreachable, failed to connect to server. {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
