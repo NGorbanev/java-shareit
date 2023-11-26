@@ -10,7 +10,6 @@ import ru.practicum.shareit.user.dto.UserDto;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import java.util.Collection;
 
 @Controller
 @RequestMapping("/users")
@@ -18,36 +17,36 @@ import java.util.Collection;
 @Validated
 @RequiredArgsConstructor
 public class UserController {
-    private final UserGateClient service;
+    private final UserGateClient userGateClient;
 
     @PostMapping
     public ResponseEntity<Object> postUser(@Valid @RequestBody UserDto userDto) {
         log.debug("POST request received. user={}", userDto);
-        return service.addUser(userDto);
+        return userGateClient.addUser(userDto);
     }
 
     @PatchMapping("/{userId}")
     public ResponseEntity<Object> updateUser(@PathVariable @Min(1) long userId, @RequestBody UserDto userDto) {
         log.debug("PATCH request received. UserId={} updating user={}", userId, userDto);
-        return service.update(userId, userDto);
+        return userGateClient.update(userId, userDto);
     }
 
     @DeleteMapping("/{userId}")
     public Boolean deleteUser(@PathVariable @Min(1) long userId) {
         log.debug("DELETE request received. UserId={}", userId);
-        service.deleteUser(userId);
+        userGateClient.deleteUser(userId);
         return true;
     }
 
     @GetMapping()
     public ResponseEntity<Object> getAllUsers() {
         log.debug("GET all users request received");
-        return service.getAllUsers();
+        return userGateClient.getAllUsers();
     }
 
     @GetMapping("/{userId}")
     public ResponseEntity<Object> getUserById(@PathVariable @Min(1) long userId) {
         log.debug("GET request received. UserId={}", userId);
-        return service.getUser(userId);
+        return userGateClient.getUser(userId);
     }
 }
