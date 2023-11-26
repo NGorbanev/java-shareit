@@ -45,7 +45,7 @@ public class ItemController {
             @RequestHeader(USER_ID) int userId,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size) {
-        log.debug(String.format("GET request received. getAllItemsOfUser method used"));
+        log.debug("GET all items of userId={} request received", userId);
         return itemService.getAllItemsOfUser(userId, page, size);
     }
 
@@ -54,7 +54,7 @@ public class ItemController {
         log.debug(String.format("GET itemId=%s", itemId));
         return itemService.get(itemId, userId);
     }
-/*
+
     @GetMapping("/search")
     public Collection<ItemDto> searchForItem(
             @NotNull @RequestParam(name = "text") String searchQuery,
@@ -63,7 +63,8 @@ public class ItemController {
         log.debug(String.format("GET request received. Searching for '%s'", searchQuery));
         return itemService.search(searchQuery, page, size);
     }
-    */
+
+    /*
     @GetMapping("/search")
     public Collection<ItemDto> searchForItem(
             @RequestParam(name = "text") String searchQuery,
@@ -72,6 +73,7 @@ public class ItemController {
         log.debug("GET request received. Searching for '{}' Page={}, size={}", searchQuery, from, size);
         return itemService.search(searchQuery, from, size);
     }
+     */
 
     @ResponseBody
     @PostMapping("/{itemId}/comment")

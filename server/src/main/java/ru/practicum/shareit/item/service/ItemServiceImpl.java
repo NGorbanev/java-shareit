@@ -60,10 +60,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> getAllItemsOfUser(int userId, int page, int size) {
-        log.info("getAllItems servicing...");
+        log.info("getAllItems from userId={} servicing...", userId);
         PageRequest pageRequest = PageRequest.of(page, size);
         log.info("getAllItemsOfUserPageable servicing... ");
-        Page<Item> items = itemStorage.findByOwnerId(userId, pageRequest);
+        Page<Item> items = itemStorage.findByOwnerIdOrderByIdAsc(userId, pageRequest);
         log.info("Request returned {} items", items.getSize());
         List<Item> itemsList = items.getContent();
         ArrayList<ItemDto> result = new ArrayList<>();
@@ -77,7 +77,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Collection<ItemDto> getAllItemsOfUserPageable(int userId, PageRequest pageRequest) {
         log.info("getAllItemsOfUserPageable servicing... ");
-        Page<Item> items = itemStorage.findByOwnerId(userId, pageRequest);
+        Page<Item> items = itemStorage.findByOwnerIdOrderByIdAsc(userId, pageRequest);
         log.info("Request returned {} items", items.getSize());
         return items.stream().map(itemMapper::toItemDto).collect(toList());
     }
