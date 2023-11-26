@@ -2,6 +2,7 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
@@ -32,10 +33,11 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public Boolean deleteUser(@PathVariable @Min(1) long userId) {
+    public ResponseEntity<Void> deleteUser(@PathVariable @Min(1) long userId) {
         log.debug("DELETE request received. UserId={}", userId);
         userGateClient.deleteUser(userId);
-        return true;
+        return new ResponseEntity<>(HttpStatus.OK);
+        //return true;
     }
 
     @GetMapping()

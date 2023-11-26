@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -14,6 +15,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class ItemClient extends BaseClient {
     private static final String API_PREFIX = "/items";
 
@@ -56,6 +58,7 @@ public class ItemClient extends BaseClient {
                 "from", from,
                 "size", size
         );
+        log.info("Sending request to server: '/search?text={}&from={}&size={}'", text, from, size);
         return get("/search?text={text}&from={from}&size={size}", userId, parameters);
     }
 
