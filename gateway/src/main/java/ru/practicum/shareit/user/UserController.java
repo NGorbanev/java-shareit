@@ -37,7 +37,6 @@ public class UserController {
         log.debug("DELETE request received. UserId={}", userId);
         userGateClient.deleteUser(userId);
         return new ResponseEntity<>(HttpStatus.OK);
-        //return true;
     }
 
     @GetMapping()

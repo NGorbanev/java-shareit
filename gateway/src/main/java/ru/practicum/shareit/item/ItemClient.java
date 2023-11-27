@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -12,6 +13,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 @Service
@@ -53,6 +55,10 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> search(long userId, String text, Integer from, Integer size) {
+        if (text.isEmpty()) {
+            log.warn("Text is empty. Nothing to search");
+            return new ResponseEntity<>("[]", HttpStatus.OK);
+        }
         Map<String, Object> parameters = Map.of(
                 "text", text,
                 "from", from,

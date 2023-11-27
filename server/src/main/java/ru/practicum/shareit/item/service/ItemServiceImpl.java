@@ -167,10 +167,6 @@ public class ItemServiceImpl implements ItemService {
     public Collection<ItemDto> search(String text, int page, int size) {
         log.info("Search request for string '{}' is servicing..", text);
         PageRequest pageRequest = PageRequest.of(page, size);
-        if (text.isEmpty()) {
-            log.warn("Text is empty. Nothing to search");
-            return Collections.emptyList();
-        }
         log.info("Getting search results");
         List<ItemDto> result = itemStorage.getItemsBySearchQuery(text.toLowerCase(), pageRequest).stream()
                 .map(itemMapper::toItemDto).collect(toList());

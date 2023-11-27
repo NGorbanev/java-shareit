@@ -3,6 +3,7 @@ package ru.practicum.shareit.exceptions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -20,6 +21,13 @@ public class ErrorHandler {
     public ErrorResponse handleConnectionException(ConnectException e) {
         log.warn("Server is unreachable, failed to connect to server. {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.warn("Bad request: {}", e.getMessage());
+        return new ErrorResponse("Check request parameters or header: " + e.getTarget());
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
