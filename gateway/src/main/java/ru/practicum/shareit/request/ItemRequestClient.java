@@ -24,6 +24,7 @@ public class ItemRequestClient extends BaseClient {
                         .build()
         );
     }
+
     public ResponseEntity<Object> getAllItemRequests(long userId, int from, int size) {
         Map<String, Object> parameters = Map.of(
                 "from", from,
