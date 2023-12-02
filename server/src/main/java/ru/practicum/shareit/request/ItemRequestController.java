@@ -27,20 +27,20 @@ public class ItemRequestController {
     @PostMapping
     public ItemRequestDto create(@Valid @RequestBody ItemRequestDto itemRequestDto,
                                  @RequestHeader(USER_ID) int requesterId) {
-        log.info("POST request for creating ItemRequest by userId={} received", requesterId);
+        log.info("POST request for creating ItemRequest. UserId={}, request={}", requesterId, itemRequestDto);
         return service.create(itemRequestDto, requesterId, LocalDateTime.now());
     }
 
     @GetMapping("/{requestId}")
     public ItemRequestDto getItemRequestById(@PathVariable("requestId") int itemRequestId,
                                              @RequestHeader(USER_ID) int userId) {
-        log.info("GET request received for getting ItemRequest with id={}", itemRequestId);
+        log.info("GET /requestId received. ItemRequest id={}", itemRequestId);
         return service.getItemRequestById(itemRequestId, userId);
     }
 
     @GetMapping
     public List<ItemRequestDto> getOwnItemRequests(@RequestHeader(USER_ID) int userId) {
-        log.info("GET request received for geting all own ItemRequests for user id={}", userId);
+        log.info("GET own request received. UserId={}", userId);
         return service.getOwnItemRequests(userId);
     }
 
@@ -48,7 +48,7 @@ public class ItemRequestController {
     public List<ItemRequestDto> getAllItemRequests(@RequestHeader(USER_ID) int userId,
                                                    @RequestParam(defaultValue = "0") Integer from,
                                                    @RequestParam(defaultValue = "10") @Positive Integer size) {
-        log.info("GET request for getting all ItemRequests received from userId={}", userId);
+        log.info("GET /all requests received. UserId={}", userId);
         return service.getAllItemRequests(userId, from, size);
     }
 }

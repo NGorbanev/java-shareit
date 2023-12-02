@@ -10,8 +10,6 @@ import ru.practicum.shareit.request.dto.ItemRequestDto;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -32,22 +30,23 @@ public class ItemRequestController {
 
     @GetMapping("/{requestId}")
     public ResponseEntity<Object> getItemRequestById(@PathVariable("requestId") long itemRequestId,
-                                             @RequestHeader(USER_ID) long userId) {
-        log.info("GET request received for getting ItemRequest with id={}", itemRequestId);
+                                                     @RequestHeader(USER_ID) long userId) {
+        log.info("GET /requestId request received. RequestId={}", itemRequestId);
         return itemRequestClient.getItemRequestById(itemRequestId, userId);
     }
 
     @GetMapping
     public ResponseEntity<Object> getOwnItemRequests(@RequestHeader(USER_ID) long userId) {
-        log.info("GET request received for geting all own ItemRequests for user id={}", userId);
+        log.info("GET own requests received for getting all own ItemRequests for user id={}", userId);
         return itemRequestClient.getOwnItemRequests(userId);
     }
 
     @GetMapping("/all")
     public ResponseEntity<Object> getAllItemRequests(@RequestHeader(USER_ID) long userId,
-                                                   @RequestParam(defaultValue = "0") Integer from,
-                                                   @RequestParam(defaultValue = "10") @Positive Integer size) {
-        log.info("GET request for getting all ItemRequests received from userId={}", userId);
+                                                     @RequestParam(defaultValue = "0") Integer from,
+                                                     @RequestParam(defaultValue = "10") @Positive Integer size) {
+        log.info("GET /all request for getting all ItemRequests received from userId={}. Paging from={}, size={}",
+                userId, from, size);
         return itemRequestClient.getAllItemRequests(userId, from, size);
     }
 }

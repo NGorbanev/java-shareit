@@ -22,19 +22,19 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<Object> postUser(@Valid @RequestBody UserDto userDto) {
-        log.debug("POST request received. user={}", userDto);
+        log.debug("POST user request received. user={}", userDto);
         return userGateClient.addUser(userDto);
     }
 
     @PatchMapping("/{userId}")
     public ResponseEntity<Object> updateUser(@PathVariable @Min(1) long userId, @RequestBody UserDto userDto) {
-        log.debug("PATCH request received. UserId={} updating user={}", userId, userDto);
+        log.debug("PATCH /userId request received. UserId={} updating user={}", userId, userDto);
         return userGateClient.update(userId, userDto);
     }
 
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> deleteUser(@PathVariable @Min(1) long userId) {
-        log.debug("DELETE request received. UserId={}", userId);
+        log.debug("DELETE /userId request received. UserId={}", userId);
         userGateClient.deleteUser(userId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -47,7 +47,7 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<Object> getUserById(@PathVariable @Min(1) long userId) {
-        log.debug("GET request received. UserId={}", userId);
+        log.debug("GET /userId request received. UserId={}", userId);
         return userGateClient.getUser(userId);
     }
 }

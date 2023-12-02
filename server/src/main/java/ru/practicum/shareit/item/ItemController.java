@@ -24,19 +24,19 @@ public class ItemController {
 
     @PostMapping()
     public ItemDto postItem(@RequestBody @Valid ItemDto itemDto, @RequestHeader(USER_ID) int userId) {
-        log.debug(String.format("POST request received. UserId=%s Object=%s", userId, itemDto));
+        log.debug("POST item received. UserId={} Object={}", userId, itemDto);
         return itemService.create(itemDto, userId);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto patchItem(@PathVariable int itemId, @RequestBody ItemDto itemDto, @RequestHeader(USER_ID) int userId) {
-        log.debug(String.format("PATCH request received. UserId=%s Object=%s", userId, itemDto));
+        log.debug("PATCH item request received. UserId={}, itemId={}, Object={}", userId, itemId, itemDto);
         return itemService.update(itemId, itemDto, userId);
     }
 
     @DeleteMapping("/{itemId}")
     public boolean deleteItem(@PathVariable int itemId, @RequestHeader(USER_ID) int userId) {
-        log.debug(String.format("DELETE request received. UserId=%s , itemId=%s", userId, itemId));
+        log.debug("DELETE item received. UserId={} , itemId={}", userId, itemId);
         return itemService.delete(itemId, userId);
     }
 
@@ -45,13 +45,13 @@ public class ItemController {
             @RequestHeader(USER_ID) int userId,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size) {
-        log.debug("GET all items of userId={} request received", userId);
+        log.debug("GET item: all received, userId={}, page={}, size={}", userId, page, size);
         return itemService.getAllItemsOfUser(userId, page, size);
     }
 
     @GetMapping("/{itemId}")
     public ItemDto getItemById(@PathVariable int itemId, @RequestHeader(USER_ID) int userId) {
-        log.debug(String.format("GET itemId=%s", itemId));
+        log.debug("GET item Id={}", itemId);
         return itemService.get(itemId, userId);
     }
 
@@ -60,7 +60,7 @@ public class ItemController {
             @RequestParam(name = "text") String searchQuery,
             @RequestParam(defaultValue = "0") int from,
             @RequestParam(defaultValue = "10") int size) {
-        log.debug("GET request received. Searching for '{}' Page={}, size={}", searchQuery, from, size);
+        log.debug("GET request /search received. Searching for '{}' Page={}, size={}", searchQuery, from, size);
         return itemService.search(searchQuery, from, size);
     }
 
@@ -68,7 +68,8 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public CommentDto postComment(@Valid @RequestBody CommentDto commentDto,
                                   @RequestHeader(USER_ID) int userId, @PathVariable int itemId) {
-        log.info("POST request received. Posting comment by userId={} to itemId={}", userId, itemId);
+        log.info("POST /itemId/comment request received. Posting comment by userId={} to itemId={}, comment={}",
+                userId, itemId, commentDto);
         return itemService.addComment(commentDto, itemId, userId);
     }
 }
