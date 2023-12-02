@@ -14,6 +14,7 @@ import java.util.List;
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Integer> {
     Page<Item> findByOwnerIdOrderByIdAsc(int ownerId, PageRequest pageRequest);
+
     @Query(value = "SELECT i FROM Item i " +
             "WHERE LOWER(i.name) LIKE LOWER(concat('%', :search, '%')) " +
             "OR LOWER(i.description) LIKE LOWER(concat('%', :search, '%')) " +
