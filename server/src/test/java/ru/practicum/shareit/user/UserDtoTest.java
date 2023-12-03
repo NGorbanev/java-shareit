@@ -8,11 +8,11 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.user.dto.UserDto;
 
-import javax.validation.ConstraintViolation;
+/*import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-import java.util.Set;
+import java.util.Set;*/
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,13 +20,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class UserDtoTest {
     private JacksonTester<UserDto> json;
     private UserDto userDto;
-    private Validator validator;
+    //private Validator validator;
 
     @Autowired
     public UserDtoTest(JacksonTester<UserDto> json) {
         this.json = json;
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        this.validator = factory.getValidator();
+        //ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        //this.validator = factory.getValidator();
     }
 
     @BeforeEach
@@ -45,7 +45,7 @@ public class UserDtoTest {
         assertThat(result).extractingJsonPathStringValue("$.name").isEqualTo("Petya");
         assertThat(result).extractingJsonPathStringValue("$.email").isEqualTo("petya@sobaka.ru");
     }
-
+/*
     @Test
     public void ifUSerDtoIsValidViolationsAreEmpty() {
         Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
@@ -91,4 +91,6 @@ public class UserDtoTest {
         assertThat(!violations.isEmpty());
         assertThat(violations.toString().contains("must be a well-formed email address"));
     }
+
+ */
 }

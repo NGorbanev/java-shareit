@@ -8,9 +8,9 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.booking.dto.ShortBookingInfo;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
+//import javax.validation.Validation;
+//import javax.validation.Validator;
+//import javax.validation.ValidatorFactory;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -19,13 +19,13 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 public class ShortBookingInfoTest {
     private JacksonTester<ShortBookingInfo> json;
     private ShortBookingInfo shortBookingInfo;
-    private Validator validator;
+    //private Validator validator;
 
     @Autowired
     public ShortBookingInfoTest(JacksonTester<ShortBookingInfo> json) {
         this.json = json;
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        this.validator = factory.getValidator();
+        //ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        //this.validator = factory.getValidator();
     }
 
     @BeforeEach

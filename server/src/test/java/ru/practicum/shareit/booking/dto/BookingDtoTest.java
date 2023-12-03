@@ -11,9 +11,9 @@ import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
+//import javax.validation.Validation;
+//import javax.validation.Validator;
+//import javax.validation.ValidatorFactory;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -22,13 +22,13 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 public class BookingDtoTest {
     private JacksonTester<BookingDto> json;
     private BookingDto bookingDto;
-    private Validator validator;
+    //private Validator validator;
 
 
     public BookingDtoTest(@Autowired JacksonTester<BookingDto> json) {
         this.json = json;
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
+        //ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        //validator = factory.getValidator();
     }
 
     @BeforeEach
