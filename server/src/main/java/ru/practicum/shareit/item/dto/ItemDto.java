@@ -6,8 +6,6 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.booking.dto.ShortBookingInfo;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
@@ -15,13 +13,8 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemDto {
     int id;
-    @NotNull(message = "Item.name is null")
-    @NotBlank(message = "Item name must not be empty")
     String name;
-    @NotNull(message = "Item.description is null")
-    @NotBlank(message = "Item description must no be empty")
     String description;
-    @NotNull(message = "Item.available is null")
     Boolean available;
     int requestId;
     private ShortBookingInfo lastBooking;

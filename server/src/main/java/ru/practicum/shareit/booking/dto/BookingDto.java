@@ -9,9 +9,6 @@ import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
 
-import javax.validation.constraints.Future;
-import javax.validation.constraints.FutureOrPresent;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Data
@@ -20,10 +17,7 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingDto {
     int id;
-    @NotNull
-    @FutureOrPresent
     LocalDateTime start;
-    @Future
     LocalDateTime end;
     ItemDto item;
     UserDto booker;

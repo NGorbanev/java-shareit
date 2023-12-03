@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
-import javax.validation.constraints.Future;
-import javax.validation.constraints.FutureOrPresent;
 import java.time.LocalDateTime;
 
 @Data
@@ -15,10 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class IncomingBookingDto {
-    //@Positive
     int itemId;
-    @FutureOrPresent
     LocalDateTime start;
-    @Future
     LocalDateTime end;
 }

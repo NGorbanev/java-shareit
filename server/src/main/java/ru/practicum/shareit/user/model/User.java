@@ -4,8 +4,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -16,7 +14,6 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class User {
     @Id
-    @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int id;
     String name;

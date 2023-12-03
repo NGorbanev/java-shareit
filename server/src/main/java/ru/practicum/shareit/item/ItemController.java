@@ -6,7 +6,6 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
-import javax.validation.Valid;
 import java.util.Collection;
 
 
@@ -22,7 +21,7 @@ public class ItemController {
     }
 
     @PostMapping()
-    public ItemDto postItem(@RequestBody @Valid ItemDto itemDto, @RequestHeader(USER_ID) int userId) {
+    public ItemDto postItem(@RequestBody ItemDto itemDto, @RequestHeader(USER_ID) int userId) {
         log.debug("POST item received. UserId={} Object={}", userId, itemDto);
         return itemService.create(itemDto, userId);
     }
@@ -65,7 +64,7 @@ public class ItemController {
 
     @ResponseBody
     @PostMapping("/{itemId}/comment")
-    public CommentDto postComment(@Valid @RequestBody CommentDto commentDto,
+    public CommentDto postComment(@RequestBody CommentDto commentDto,
                                   @RequestHeader(USER_ID) int userId, @PathVariable int itemId) {
         log.info("POST /itemId/comment request received. Posting comment by userId={} to itemId={}, comment={}",
                 userId, itemId, commentDto);

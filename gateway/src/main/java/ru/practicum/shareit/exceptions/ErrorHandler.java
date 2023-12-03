@@ -1,7 +1,6 @@
 package ru.practicum.shareit.exceptions;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
@@ -98,11 +97,4 @@ public class ErrorHandler {
     public ErrorResponse handleItemRequestNotFoundException(final ItemRequestNotFound ex) {
         return new ErrorResponse(ex.getMessage());
     }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleDataIntegrityViolationException(final DataIntegrityViolationException ex) {
-        return new ErrorResponse(ex.getMessage());
-    }
-
 }

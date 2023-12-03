@@ -6,7 +6,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Data
@@ -21,10 +20,8 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int id;
     @Column(name = "start_date")
-    @NotNull
     LocalDateTime start;
     @Column(name = "end_date")
-    @NotNull
     LocalDateTime end;
     @ManyToOne()
     @JoinColumn(name = "item_id", referencedColumnName = "id")
