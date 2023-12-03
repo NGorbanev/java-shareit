@@ -55,11 +55,6 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidatonException(
                     String.format("Item id=%s is not available for booking", incomingBookingDto.getItemId()));
         }
-
-        if (!incomingBookingDto.getEnd().isAfter(incomingBookingDto.getStart())) {
-            log.warn("Wrong start or end date");
-            throw new ValidatonException("Wrong start or end date");
-        }
         Booking newBooking = mapper.toBooking(incomingBookingDto, bookerId);
         if (itemsValidator.ownerMatch(newBooking.getItem().getId(), bookerId)) {
             log.warn("User id={} can't perform a booking of an owned item id = {}",

@@ -98,20 +98,6 @@ public class BookingServiceTest {
     }
 
     @Test
-    public void throwExceptionWhenEndDateIsBeforeStartDate() {
-        UserDto ownerDto = userService.addUser(userDto1);
-        ItemDto newItemDto = itemService.create(itemDto1, ownerDto.getId());
-        UserDto newUserDto = userService.addUser(userDto2);
-        IncomingBookingDto incomingBookingDto = IncomingBookingDto.builder()
-                .itemId(newItemDto.getId())
-                .start(LocalDateTime.now().plusMinutes(1))
-                .end(LocalDateTime.now().plusSeconds(5))
-                .build();
-        Assertions.assertThrows(ValidatonException.class,
-                () -> bookingService.create(incomingBookingDto, newUserDto.getId()));
-    }
-
-    @Test
     public void throwExceptionWhenItemIsNotAvailableForBooking() {
         UserDto ownerDto = userService.addUser(userDto1);
         UserDto newUserDto = userService.addUser(userDto2);

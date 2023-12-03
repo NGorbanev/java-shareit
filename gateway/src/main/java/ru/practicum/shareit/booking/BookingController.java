@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookItemRequestDto;
 import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.exceptions.UnknownStateException;
+import ru.practicum.shareit.exceptions.ValidatonException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -26,6 +27,10 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<Object> create(@Valid @RequestBody BookItemRequestDto incomingBookingDto,
                                          @RequestHeader(USER_ID) @Positive long bookerId) {
+        if (!incomingBookingDto.getEnd().isAfter(incomingBookingDto.getStart())) {
+            log.warn("Wrong start or end date");
+            throw new ValidatonException("Wrong start or end date");
+        }
         log.info("POST Booking create request userId={}, payload:{}", bookerId, incomingBookingDto);
         return bookingClient.addBooking(bookerId, incomingBookingDto);
     }
